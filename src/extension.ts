@@ -1,6 +1,12 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
+import { ListRolesCommand } from "@aws-sdk/client-iam";
+import { ListFunctionsCommand } from "@aws-sdk/client-lambda";
+import { ListBucketsCommand } from "@aws-sdk/client-s3";
 import * as vscode from "vscode";
+import { iamClient } from "./clients/iamClient";
+import { lambdaClient } from "./clients/lambdaClient";
+import { s3Client } from "./clients/s3Client";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -37,7 +43,16 @@ export function activate(context: vscode.ExtensionContext) {
   //   "nodeDependencies",
   //   // null
   // );
+  console.log(vscode.workspace);
   console.log(rootPath);
+
+  s3Client.send(new ListBucketsCommand({})).then((res) => {
+    console.log(res);
+  });
+
+  iamClient.send(new ListRolesCommand({})).then(console.log);
+
+  lambdaClient.send(new ListFunctionsCommand({})).then(console.log);
 }
 
 // this method is called when your extension is deactivated
