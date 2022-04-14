@@ -7,6 +7,7 @@ import * as vscode from "vscode";
 import { iamClient } from "./clients/iamClient";
 import { lambdaClient } from "./clients/lambdaClient";
 import { s3Client } from "./clients/s3Client";
+import { S3BucketTreeProvider } from "./treeview/s3BucketTreeProvider";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -53,6 +54,8 @@ export function activate(context: vscode.ExtensionContext) {
   iamClient.send(new ListRolesCommand({})).then(console.log);
 
   lambdaClient.send(new ListFunctionsCommand({})).then(console.log);
+
+  vscode.window.registerTreeDataProvider("aws-s3-buckets", new S3BucketTreeProvider);
 }
 
 // this method is called when your extension is deactivated
