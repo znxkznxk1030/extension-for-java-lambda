@@ -13,7 +13,7 @@ export class AWSS3BucketTreeNode extends AWSTreeNodeBase {
     label: string,
     tooltip?: string
   ) {
-    super(label, TreeItemCollapsibleState.Collapsed);
+    super(label, TreeItemCollapsibleState.Expanded);
     this.bucket = label;
     this.tooltip = tooltip;
     this.contextValue = "awsBucketNode";
@@ -25,13 +25,13 @@ export class AWSS3BucketTreeNode extends AWSTreeNodeBase {
 
   public async updateChildren(): Promise<void> {}
 
-  private async listAWSS3Object(): Promise<AWSTreeNodeBase[]> {
+  private async listAWSS3Object(): Promise<AWSS3ObjectTreeNode[]> {
     let { Contents: s3Objects } = await s3Client.send(
       // eslint-disable-next-line @typescript-eslint/naming-convention
       new ListObjectsCommand({ Bucket: this.bucket })
     );
 
-    console.log(s3Objects);
+    // console.log(s3Objects);
 
     return (
       s3Objects

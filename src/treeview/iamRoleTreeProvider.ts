@@ -1,4 +1,4 @@
-import { ListRolesCommand } from "@aws-sdk/client-iam";
+import { ListRolesCommand, Role } from "@aws-sdk/client-iam";
 import * as vscode from "vscode";
 import { iamClient } from "../clients/iamClient";
 import { AWSIamRoleTreeNode } from "./node/IAMRoleTreeNode";
@@ -33,10 +33,22 @@ export class IAMRoleTreeProvider
   private async listAWSIamRole(): Promise<AWSTreeNodeBase[]> {
     let { Roles: roles } = await iamClient.send(new ListRolesCommand({}));
 
-    let awsBucketTreeNode = roles?.map((role) => {
-      const name = role?.RoleName || "untitled";
+    let awsBucketTreeNode = roles?.map((_role) => {
+      const name = _role?.RoleName || "untitled";
       const tooltip = name;
-      return new AWSIamRoleTreeNode(undefined, name, tooltip);
+      
+      const role = {
+        roleId: _role.RoleId || "",
+        roleName: _role.RoleName || "",
+        arn: _role.Arn || "",
+        path: _role.Path || "",
+
+        maxSessionDuration: _role.MaxSessionDuration,
+        description: _role.Description,
+        createDate: _role.CreateDate,
+      };
+
+      return new AWSIamRoleTreeNode(role, tooltip);
     });
 
     return awsBucketTreeNode || [];
