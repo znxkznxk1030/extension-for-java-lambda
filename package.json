@@ -35,7 +35,7 @@
         },
         {
           "id": "aws-s3-buckets",
-          "name": "S3 Bucket"
+          "name": "S3 Bucket ( jar | zip )"
         },
         {
           "id": "aws-lambda",

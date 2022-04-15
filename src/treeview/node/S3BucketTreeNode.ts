@@ -34,11 +34,13 @@ export class AWSS3BucketTreeNode extends AWSTreeNodeBase {
     console.log(s3Objects);
 
     return (
-      s3Objects?.map((s3Obj) => {
-        const name = s3Obj?.Key || "untitled";
-        const tooltip = name;
-        return new AWSS3ObjectTreeNode(this, name, tooltip);
-      }) || []
+      s3Objects
+        ?.map((s3Obj): AWSS3ObjectTreeNode => {
+          const name = s3Obj?.Key || "untitled";
+          const tooltip = name;
+          return new AWSS3ObjectTreeNode(this, name, tooltip);
+        })
+        .filter((obj) => obj.isArchive()) || []
     );
   }
 

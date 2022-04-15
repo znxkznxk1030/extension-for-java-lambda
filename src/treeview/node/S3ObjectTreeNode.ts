@@ -3,25 +3,30 @@ import { TreeItemCollapsibleState } from "vscode";
 import { AWSTreeNodeBase } from "./TreeNodeBase";
 
 export class AWSS3ObjectTreeNode extends AWSTreeNodeBase {
-  private readonly s3Key: string;
+  private readonly ext: string;
   public constructor(
     public readonly parent: AWSTreeNodeBase | undefined,
     label: string,
     tooltip?: string
   ) {
     super(label, TreeItemCollapsibleState.None);
-    this.s3Key = label;
+    this.ext = label.split(".").pop() || "";
     this.tooltip = tooltip;
     this.contextValue = "awsObjectNode";
     this.iconPath = this.gatFileIconPath();
   }
 
-  private gatFileIconPath(): string {
-    const ext = this.s3Key.split(".").pop();
+  public isArchive(): boolean {
+    return ["jar", "war", "zip"].includes(this.ext);
+  }
 
-    switch (ext) {
+  private gatFileIconPath(): string {
+    switch (this.ext) {
       case "jar":
-        return path.join(__dirname, "..", "media", "jar-icon.png");
+      case "war":
+        return path.join(__dirname, "..", "media", "java-icon.png");
+      case "zip":
+        return path.join(__dirname, "..", "media", "zip-icon.png");
     }
 
     return "";
