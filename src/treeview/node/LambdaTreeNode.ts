@@ -14,6 +14,7 @@ export interface AWSLambdaNode {
   // lastModified: string;
 }
 
+import path = require("path");
 import { TreeItemCollapsibleState } from "vscode";
 import { AWSTreeNodeBase } from "./TreeNodeBase";
 
@@ -26,5 +27,8 @@ export class AWSLambdaTreeNode extends AWSTreeNodeBase {
     super(label, TreeItemCollapsibleState.None);
     this.tooltip = tooltip;
     this.contextValue = "awsBucketNode";
+    console.log(path.join(__dirname, "..", "media", "aws-lambda.svg"));
   }
+
+  iconPath = path.join(__dirname, "..", "media", "aws-lambda.svg");
 }

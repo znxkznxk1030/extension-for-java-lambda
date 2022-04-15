@@ -6,6 +6,7 @@ export interface AWSIAMRoleNode {
   createDate: string;
 }
 
+import path = require("path");
 import { TreeItemCollapsibleState } from "vscode";
 import { AWSTreeNodeBase } from "./TreeNodeBase";
 
@@ -19,4 +20,6 @@ export class AWSIamRoleTreeNode extends AWSTreeNodeBase {
     this.tooltip = tooltip;
     this.contextValue = "awsBucketNode";
   }
+
+  iconPath = path.join(__dirname, "..", "media", "aws-iam-role.svg");
 }
