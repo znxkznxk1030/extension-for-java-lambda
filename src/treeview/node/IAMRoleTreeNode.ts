@@ -1,8 +1,15 @@
+export interface AWSIAMRoleNode {
+  arn: string;
+  name: string;
+  description: string;
+  roleId: string;
+  createDate: string;
+}
 
 import { TreeItemCollapsibleState } from "vscode";
-import { AWSTreeNodeBase } from "./awsTreeNodeBase";
+import { AWSTreeNodeBase } from "./TreeNodeBase";
 
-export class AWSS3BucketTreeNode extends AWSTreeNodeBase {
+export class AWSIamRoleTreeNode extends AWSTreeNodeBase {
   public constructor(
     public readonly parent: AWSTreeNodeBase | undefined,
     label: string,

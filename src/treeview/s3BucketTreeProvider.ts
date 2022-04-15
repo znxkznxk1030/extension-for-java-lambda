@@ -1,14 +1,12 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
-import { AWSTreeNodeBase } from "./node/awsTreeNodeBase";
+import { AWSTreeNodeBase } from "./node/TreeNodeBase";
 import { s3Client } from "../clients/s3Client";
 import { ListBucketsCommand } from "@aws-sdk/client-s3";
-import { AWSS3BucketTreeNode } from "./node/awsS3BucketTreeNode";
+import { AWSS3BucketTreeNode } from "./node/S3BucketTreeNode";
 
-export class S3BucketTreeProvider
-  implements vscode.TreeDataProvider<AWSTreeNodeBase>
-{
+export class S3BucketTreeProvider implements vscode.TreeDataProvider<AWSTreeNodeBase> {
   onDidChangeTreeData?:
     | vscode.Event<
         void | AWSTreeNodeBase | AWSTreeNodeBase[] | null | undefined
@@ -23,6 +21,8 @@ export class S3BucketTreeProvider
     element?: AWSTreeNodeBase
   ): Promise<AWSTreeNodeBase[]> {
     let childNodes: AWSTreeNodeBase[] = [];
+
+    console.log(element);
 
     if (element) {
       childNodes = childNodes.concat(await element.getChildren());

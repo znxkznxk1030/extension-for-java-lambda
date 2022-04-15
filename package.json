@@ -26,16 +26,20 @@
     "views": {
       "aws-lambda-java": [
         {
-          "id": "aws-s3-buckets",
-          "name": "S3 Bucket"
+          "id": "aws-invoke-function",
+          "name": "Invoke Lambda Function"
         },
         {
           "id": "aws-iam-role",
           "name": "IAM Role"
         },
         {
+          "id": "aws-s3-buckets",
+          "name": "S3 Bucket"
+        },
+        {
           "id": "aws-lambda",
-          "name": "Lambda"
+          "name": "Lambda Function"
         }
       ]
     },
