@@ -1,6 +1,7 @@
 import { ListRolesCommand, Role } from "@aws-sdk/client-iam";
 import * as vscode from "vscode";
 import { iamClient } from "../clients/iamClient";
+import { hasRoleTrustedEntity, ENTITY_LAMBDA } from "../iam/utils";
 import { AWSIamRoleTreeNode } from "./node/IAMRoleTreeNode";
 import { AWSTreeNodeBase } from "./node/TreeNodeBase";
 
@@ -33,23 +34,25 @@ export class IAMRoleTreeProvider
   private async listAWSIamRole(): Promise<AWSTreeNodeBase[]> {
     let { Roles: roles } = await iamClient.send(new ListRolesCommand({}));
 
-    let awsBucketTreeNode = roles?.map((_role) => {
-      const name = _role?.RoleName || "untitled";
-      const tooltip = name;
-      
-      const role = {
-        roleId: _role.RoleId || "",
-        roleName: _role.RoleName || "",
-        arn: _role.Arn || "",
-        path: _role.Path || "",
+    let awsBucketTreeNode = roles
+      ?.filter((role) => {
+        return hasRoleTrustedEntity(role, ENTITY_LAMBDA);
+      })
+      .map((role) => {
+        const _role = {
+          roleId: role.RoleId || "",
+          roleName: role.RoleName || "",
+          arn: role.Arn || "",
+          path: role.Path || "",
+          assumeRolePolicyDocument: role.AssumeRolePolicyDocument || "",
 
-        maxSessionDuration: _role.MaxSessionDuration,
-        description: _role.Description,
-        createDate: _role.CreateDate,
-      };
+          maxSessionDuration: role.MaxSessionDuration,
+          description: role.Description,
+          createDate: role.CreateDate,
+        };
 
-      return new AWSIamRoleTreeNode(role, tooltip);
-    });
+        return new AWSIamRoleTreeNode(_role);
+      });
 
     return awsBucketTreeNode || [];
   }

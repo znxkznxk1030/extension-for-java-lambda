@@ -16,17 +16,17 @@ import { Policy } from "aws-sdk/clients/iam";
 import path = require("path");
 import { TreeItemCollapsibleState } from "vscode";
 import { iamClient } from "../../clients/iamClient";
-import { AWSRole } from "../../type/awsResource";
+import { AWSRole } from "../../type/awsResources";
 import { AWSIAMPolicyTreeNode } from "./IAMPolicyTreeNode";
 import { AWSTreeNodeBase } from "./TreeNodeBase";
 
 export class AWSIamRoleTreeNode extends AWSTreeNodeBase {
   private readonly role: AWSRole | undefined;
 
-  public constructor(role: AWSRole, tooltip?: string) {
+  public constructor(role: AWSRole) {
     super(role.roleName, TreeItemCollapsibleState.Collapsed);
     this.role = role;
-    this.tooltip = tooltip;
+    this.tooltip = role.description;
     this.contextValue = "awsBucketNode";
   }
 
