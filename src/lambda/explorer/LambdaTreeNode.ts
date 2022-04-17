@@ -16,7 +16,7 @@ export interface AWSLambdaNode {
 
 import path = require("path");
 import { TreeItemCollapsibleState } from "vscode";
-import { AWSTreeNodeBase } from "./TreeNodeBase";
+import { AWSTreeNodeBase } from "../../treeview/node/TreeNodeBase";
 
 export class AWSLambdaTreeNode extends AWSTreeNodeBase {
   public constructor(

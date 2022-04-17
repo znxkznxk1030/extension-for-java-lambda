@@ -3,7 +3,7 @@ import path = require("path");
 import { TreeItemCollapsibleState } from "vscode";
 import { s3Client } from "../../clients/s3Client";
 import { AWSS3ObjectTreeNode } from "./S3ObjectTreeNode";
-import { AWSTreeNodeBase } from "./TreeNodeBase";
+import { AWSTreeNodeBase } from "../../treeview/node/TreeNodeBase";
 
 export class AWSS3BucketTreeNode extends AWSTreeNodeBase {
   private readonly bucket: string;

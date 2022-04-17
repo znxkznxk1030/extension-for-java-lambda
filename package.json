@@ -67,10 +67,6 @@
     },
     "commands": [
       {
-        "command": "toolkit-for-awsLambdaExplorer-java.helloWorld",
-        "title": "Hello World"
-      },
-      {
         "command": "iamRole.refreshEntry",
         "title": "Tookit For AWS : Refresh IAM Role",
         "icon": {

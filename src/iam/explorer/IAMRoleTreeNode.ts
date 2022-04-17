@@ -18,7 +18,7 @@ import { TreeItemCollapsibleState } from "vscode";
 import { iamClient } from "../../clients/iamClient";
 import { AWSRole } from "../../type/awsResources";
 import { AWSIAMPolicyTreeNode } from "./IAMPolicyTreeNode";
-import { AWSTreeNodeBase } from "./TreeNodeBase";
+import { AWSTreeNodeBase } from "../../treeview/node/TreeNodeBase";
 
 export class AWSIamRoleTreeNode extends AWSTreeNodeBase {
   private readonly role: AWSRole | undefined;

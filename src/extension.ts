@@ -7,9 +7,9 @@ import * as vscode from "vscode";
 import { iamClient } from "./clients/iamClient";
 import { lambdaClient } from "./clients/lambdaClient";
 import { s3Client } from "./clients/s3Client";
-import { IAMRoleTreeProvider } from "./treeview/iamRoleTreeProvider";
-import { LambdaTreeProvider } from "./treeview/lambdaTreeProvider";
-import { S3BucketTreeProvider } from "./treeview/s3BucketTreeProvider";
+import { IAMRoleExplorer } from "./iam/explorer/IAMRoleExplorer";
+import { LambdaExplorer } from "./lambda/explorer/LambdaExplorer";
+import { S3BucketExplorer } from "./s3/explorer/S3BucketExplorer";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -45,9 +45,9 @@ export function activate(context: vscode.ExtensionContext) {
   // console.log(vscode.workspace);
   // console.log(rootPath);
 
-  const s3BucketTreeProvider = new S3BucketTreeProvider();
-  const iamRoleTreeProvider = new IAMRoleTreeProvider();
-  const lambdaTreeProvider = new LambdaTreeProvider();
+  const s3BucketTreeProvider = new S3BucketExplorer();
+  const iamRoleTreeProvider = new IAMRoleExplorer();
+  const lambdaTreeProvider = new LambdaExplorer();
 
   let iamTree = vscode.window.registerTreeDataProvider(
     "awsIAMRoleExplorer",

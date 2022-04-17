@@ -1,6 +1,6 @@
 import path = require("path");
 import { TreeItemCollapsibleState } from "vscode";
-import { AWSTreeNodeBase } from "./TreeNodeBase";
+import { AWSTreeNodeBase } from "../../treeview/node/TreeNodeBase";
 
 export class AWSS3ObjectTreeNode extends AWSTreeNodeBase {
   private readonly ext: string;
