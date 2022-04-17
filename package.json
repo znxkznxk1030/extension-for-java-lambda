@@ -1,5 +1,5 @@
 {
-  "name": "toolkit-for-aws-lambda-java",
+  "name": "toolkit-for-awsLambdaExplorer-java",
   "displayName": "Toolkit for AWS Lambda ( Java )",
   "description": "",
   "version": "0.0.1",
@@ -10,43 +10,89 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:toolkit-for-aws-lambda-java.helloWorld"
+    "onView:aws-invoke-function",
+    "onView:awsIAMRoleExplorer",
+    "onView:awsS3BucketExplorer",
+    "onView:awsLambdaExplorer"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "aws-lambda-java",
+          "id": "awsLambdaExplorer-java",
           "title": "Toolkit for AWS Lambda ( Java )",
           "icon": "media/aws-lambda.svg"
         }
       ]
     },
+    "menus": {
+      "view/title": [
+        {
+          "command": "iamRole.refreshEntry",
+          "when": "view == awsIAMRoleExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "s3buckets.refreshEntry",
+          "when": "view == awsS3BucketExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "lambda.refreshEntry",
+          "when": "view == awsLambdaExplorer",
+          "group": "navigation"
+        }
+      ]
+    },
     "views": {
-      "aws-lambda-java": [
+      "awsLambdaExplorer-java": [
         {
           "id": "aws-invoke-function",
           "name": "Invoke Lambda Function"
         },
         {
-          "id": "aws-iam-role",
-          "name": "IAM Role"
+          "id": "awsIAMRoleExplorer",
+          "name": "IAM Role ( Trusted Entity - Lambda )"
         },
         {
-          "id": "aws-s3-buckets",
+          "id": "awsS3BucketExplorer",
           "name": "S3 Bucket ( jar | zip )"
         },
         {
-          "id": "aws-lambda",
+          "id": "awsLambdaExplorer",
           "name": "Lambda Function"
         }
       ]
     },
     "commands": [
       {
-        "command": "toolkit-for-aws-lambda-java.helloWorld",
+        "command": "toolkit-for-awsLambdaExplorer-java.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "iamRole.refreshEntry",
+        "title": "Tookit For AWS : Refresh IAM Role",
+        "icon": {
+          "light": "media/light/refresh.svg",
+          "dark": "media/dark/refresh.svg"
+        }
+      },
+      {
+        "command": "s3buckets.refreshEntry",
+        "title": "Tookit For AWS : Refresh S3 Bucket",
+        "icon": {
+          "light": "media/light/refresh.svg",
+          "dark": "media/dark/refresh.svg"
+        }
+      },
+      {
+        "command": "lambda.refreshEntry",
+        "title": "Tookit For AWS : Refresh Lambda",
+        "icon": {
+          "light": "media/light/refresh.svg",
+          "dark": "media/dark/refresh.svg"
+        }
       }
     ]
   },

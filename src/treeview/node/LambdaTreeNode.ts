@@ -27,7 +27,7 @@ export class AWSLambdaTreeNode extends AWSTreeNodeBase {
     super(label, TreeItemCollapsibleState.None);
     this.tooltip = tooltip;
     this.contextValue = "awsBucketNode";
-    console.log(path.join(__dirname, "..", "media", "aws-lambda.svg"));
+    console.log(path.join(__dirname, "..", "media", "awsLambdaExplorer.svg"));
   }
 
   iconPath = path.join(__dirname, "..", "media", "aws-lambda.svg");

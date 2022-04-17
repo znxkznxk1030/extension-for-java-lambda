@@ -7,11 +7,12 @@ import { AWSTreeNodeBase } from "./node/TreeNodeBase";
 export class LambdaTreeProvider
   implements vscode.TreeDataProvider<AWSTreeNodeBase>
 {
-  onDidChangeTreeData?:
-    | vscode.Event<
-        void | AWSTreeNodeBase | AWSTreeNodeBase[] | null | undefined
-      >
-    | undefined;
+  private _onDidChangeTreeData: vscode.EventEmitter<
+    AWSTreeNodeBase | undefined | null | void
+  > = new vscode.EventEmitter<AWSTreeNodeBase | undefined | null | void>();
+  readonly onDidChangeTreeData: vscode.Event<
+    AWSTreeNodeBase | undefined | null | void
+  > = this._onDidChangeTreeData.event;
 
   getTreeItem(
     element: AWSTreeNodeBase
@@ -42,5 +43,9 @@ export class LambdaTreeProvider
     });
 
     return awsBucketTreeNode || [];
+  }
+
+  refresh(): void {
+    this._onDidChangeTreeData.fire();
   }
 }

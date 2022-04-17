@@ -5,14 +5,13 @@ import { hasRoleTrustedEntity, ENTITY_LAMBDA } from "../iam/utils";
 import { AWSIamRoleTreeNode } from "./node/IAMRoleTreeNode";
 import { AWSTreeNodeBase } from "./node/TreeNodeBase";
 
-export class IAMRoleTreeProvider
-  implements vscode.TreeDataProvider<AWSTreeNodeBase>
-{
-  onDidChangeTreeData?:
-    | vscode.Event<
-        void | AWSTreeNodeBase | AWSTreeNodeBase[] | null | undefined
-      >
-    | undefined;
+export class IAMRoleTreeProvider implements vscode.TreeDataProvider<AWSTreeNodeBase> {
+  private _onDidChangeTreeData: vscode.EventEmitter<
+    AWSTreeNodeBase | undefined | null | void
+  > = new vscode.EventEmitter<AWSTreeNodeBase | undefined | null | void>();
+  readonly onDidChangeTreeData: vscode.Event<
+    AWSTreeNodeBase | undefined | null | void
+  > = this._onDidChangeTreeData.event;
 
   getTreeItem(
     element: AWSTreeNodeBase
@@ -55,5 +54,9 @@ export class IAMRoleTreeProvider
       });
 
     return awsBucketTreeNode || [];
+  }
+
+  refresh(): void {
+    this._onDidChangeTreeData.fire();
   }
 }

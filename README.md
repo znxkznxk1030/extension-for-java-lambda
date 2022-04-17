@@ -1,6 +1,6 @@
-# toolkit-for-aws-lambda-java README
+# toolkit-for-awsLambdaExplorer-java README
 
-This is the README for your extension "toolkit-for-aws-lambda-java". After writing up a brief description, we recommend including the following sections.
+This is the README for your extension "toolkit-for-awsLambdaExplorer-java". After writing up a brief description, we recommend including the following sections.
 
 ## Features
 

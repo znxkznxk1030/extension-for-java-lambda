@@ -6,12 +6,15 @@ import { s3Client } from "../clients/s3Client";
 import { ListBucketsCommand } from "@aws-sdk/client-s3";
 import { AWSS3BucketTreeNode } from "./node/S3BucketTreeNode";
 
-export class S3BucketTreeProvider implements vscode.TreeDataProvider<AWSTreeNodeBase> {
-  onDidChangeTreeData?:
-    | vscode.Event<
-        void | AWSTreeNodeBase | AWSTreeNodeBase[] | null | undefined
-      >
-    | undefined;
+export class S3BucketTreeProvider
+  implements vscode.TreeDataProvider<AWSTreeNodeBase>
+{
+  private _onDidChangeTreeData: vscode.EventEmitter<
+    AWSTreeNodeBase | undefined | null | void
+  > = new vscode.EventEmitter<AWSTreeNodeBase | undefined | null | void>();
+  readonly onDidChangeTreeData: vscode.Event<
+    AWSTreeNodeBase | undefined | null | void
+  > = this._onDidChangeTreeData.event;
 
   public getTreeItem(element: AWSTreeNodeBase): vscode.TreeItem {
     return element;
@@ -21,8 +24,6 @@ export class S3BucketTreeProvider implements vscode.TreeDataProvider<AWSTreeNode
     element?: AWSTreeNodeBase
   ): Promise<AWSTreeNodeBase[]> {
     let childNodes: AWSTreeNodeBase[] = [];
-
-    console.log(element);
 
     if (element) {
       childNodes = childNodes.concat(await element.getChildren());
@@ -45,5 +46,9 @@ export class S3BucketTreeProvider implements vscode.TreeDataProvider<AWSTreeNode
     });
 
     return awsBucketTreeNode || [];
+  }
+
+  refresh(): void {
+    this._onDidChangeTreeData.fire();
   }
 }
