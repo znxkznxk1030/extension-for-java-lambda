@@ -1,7 +1,7 @@
 import { ListFunctionsCommand } from "@aws-sdk/client-lambda";
 import * as vscode from "vscode";
 import { lambdaClient } from "../../clients/lambdaClient";
-import { AWSTreeDataProvider } from "../../treeview/awsTreeDataProvider";
+import { AWSTreeDataProvider } from "../../treeview/AwsTreeDataProvider";
 import { AWSLambdaTreeNode } from "./LambdaTreeNode";
 import { AWSTreeNodeBase } from "../../treeview/node/TreeNodeBase";
 

@@ -1,7 +1,7 @@
 import { ListRolesCommand, Role } from "@aws-sdk/client-iam";
 import { iamClient } from "../../clients/iamClient";
 import { hasRoleTrustedEntity, ENTITY_LAMBDA } from "../utils";
-import { AWSTreeDataProvider } from "../../treeview/awsTreeDataProvider";
+import { AWSTreeDataProvider } from "../../treeview/AwsTreeDataProvider";
 import { AWSIamRoleTreeNode } from "./IAMRoleTreeNode";
 import { AWSTreeNodeBase } from "../../treeview/node/TreeNodeBase";
 
