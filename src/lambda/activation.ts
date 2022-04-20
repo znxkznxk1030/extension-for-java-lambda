@@ -15,5 +15,11 @@ export async function activateLambda(context: vscode.ExtensionContext) {
     })
   );
 
+  context.subscriptions.push(
+    vscode.commands.registerCommand("lambda.createFunction", () => {
+      lambdaTreeProvider.refresh();
+    })
+  );
+
   context.subscriptions.push(lambdaTree);
 }

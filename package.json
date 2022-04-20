@@ -26,25 +26,6 @@
         }
       ]
     },
-    "menus": {
-      "view/title": [
-        {
-          "command": "iamRole.refreshEntry",
-          "when": "view == awsIAMRoleExplorer",
-          "group": "navigation"
-        },
-        {
-          "command": "s3buckets.refreshEntry",
-          "when": "view == awsS3BucketExplorer",
-          "group": "navigation"
-        },
-        {
-          "command": "lambda.refreshEntry",
-          "when": "view == awsLambdaExplorer",
-          "group": "navigation"
-        }
-      ]
-    },
     "views": {
       "awsLambdaExplorer-java": [
         {
@@ -62,6 +43,30 @@
         {
           "id": "awsLambdaExplorer",
           "name": "Lambda Function"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "iamRole.refreshEntry",
+          "when": "view == awsIAMRoleExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "s3buckets.refreshEntry",
+          "when": "view == awsS3BucketExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "lambda.refreshEntry",
+          "when": "view == awsLambdaExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "lambda.createFunction",
+          "when": "view == awsLambdaExplorer",
+          "group": "navigation"
         }
       ]
     },
@@ -88,6 +93,14 @@
         "icon": {
           "light": "media/light/refresh.svg",
           "dark": "media/dark/refresh.svg"
+        }
+      },
+      {
+        "command": "lambda.createFunction",
+        "title": "Tookit For AWS : Create Lambda Function",
+        "icon": {
+          "light": "media/light/plus.svg",
+          "dark": "media/dark/plus.svg"
         }
       }
     ]
