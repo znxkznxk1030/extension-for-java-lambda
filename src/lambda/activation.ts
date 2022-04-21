@@ -17,7 +17,9 @@ export async function activateLambda(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("lambda.createFunction", () => {
-      lambdaTreeProvider.refresh();
+      // lambdaTreeProvider.refresh();
+      const picker = vscode.window.createQuickPick < vscode.QuickPickItem >();
+      picker.show();
     })
   );
 
