@@ -1,5 +1,12 @@
 /**
+ * Copied from "aws-toolkit=vscode"
+ *         - Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *         - SPDX-License-Identifier: Apache-2.0
+ * Origin: https://github.com/aws/aws-toolkit-vscode/blob/479b9d45b5f5ad30fc10567e649b59801053aeba/src/shared/ui/Prompter.ts
  *
+ * Modified
+ *  - Remove EstimateSteps Logics
+ *  - Transalte comments to Korean
  */
 export type PromptResult<T> = T | undefined; //| WizardControl
 

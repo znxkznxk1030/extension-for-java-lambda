@@ -1,3 +1,11 @@
+/**
+ * Copied from "aws-toolkit=vscode"
+ *         - Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *         - SPDX-License-Identifier: Apache-2.0
+ * Origin: https://github.com/aws/aws-toolkit-vscode/blob/479b9d45b5f5ad30fc10567e649b59801053aeba/src/shared/ui/common/exitPrompter.ts
+ */
+
+import { createQuickPick } from "../pickerPrompter";
 import { Prompter, PromptResult } from "../prompter";
 
 class ExitPrompter extends Prompter<boolean> {
@@ -8,7 +16,7 @@ class ExitPrompter extends Prompter<boolean> {
   }
   public set recentItem(response: any) {}
 
-  protected promptUser(): Promise<PromptResult<boolean>> {
+  protected async promptUser(): Promise<PromptResult<boolean>> {
     if (this._isStart) {
       return true;
     }
