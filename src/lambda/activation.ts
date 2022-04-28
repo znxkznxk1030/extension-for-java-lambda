@@ -1,4 +1,8 @@
+import { ListRolesCommand } from "@aws-sdk/client-iam";
 import * as vscode from "vscode";
+import { iamClient } from "../clients/iamClient";
+import { PickPrompter } from "../ui/prompter";
+import { deployLambdaFunction } from "./commands/deployLambda";
 import { LambdaExplorer } from "./explorer/LambdaExplorer";
 
 export async function activateLambda(context: vscode.ExtensionContext) {
@@ -16,11 +20,10 @@ export async function activateLambda(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("lambda.createFunction", () => {
-      // lambdaTreeProvider.refresh();
-      const picker = vscode.window.createQuickPick < vscode.QuickPickItem >();
-      picker.show();
-    })
+    vscode.commands.registerCommand(
+      "lambda.createFunction",
+      deployLambdaFunction
+    )
   );
 
   context.subscriptions.push(lambdaTree);

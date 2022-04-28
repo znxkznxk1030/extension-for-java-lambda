@@ -1,70 +1,73 @@
-/**
- * Copied from "aws-toolkit=vscode"
- *         - Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *         - SPDX-License-Identifier: Apache-2.0
- * Origin: https://github.com/aws/aws-toolkit-vscode/blob/479b9d45b5f5ad30fc10567e649b59801053aeba/src/shared/ui/Prompter.ts
- *
- * Modified
- *  - Remove EstimateSteps Logics
- *  - Transalte comments to Korean
- */
-export type PromptResult<T> = T | undefined; //| WizardControl
+import { resolve } from "path";
+import * as vscode from "vscode";
 
-export type Transform<T, R = T> = (result: T) => R;
+export interface Prompter<T> {
+  picker: vscode.QuickInput;
+  interact: () => Promise<T | T[] | undefined>;
+}
 
-/**
- * 'prompt' UI 의 일반 추상화
- */
-export abstract class Prompter<T> {
-  private disposed = false;
-  protected transforms: Transform<T, any>[] = [];
+export class PickPrompter<T extends vscode.QuickPickItem>
+  implements Prompter<T>
+{
+  picker: vscode.QuickPick<T>;
+  canSelectMany = false;
 
-  constructor() {}
+  constructor(picker: vscode.QuickPick<T>, options: vscode.QuickPickOptions) {
+    this.picker = picker;
 
-  /** 프롬프트의 총 step수를 반환 */
-  public get totalSteps(): number {
-    return 1;
-  }
-
-  /** */
-  public abstract get recentItem(): any;
-  public abstract set recentItem(response: any);
-
-  /** Type-helper, 프롬프터가 다른 형태로 맵핑될 수 있도록 허가한다. */
-  public transform<R>(callback: Transform<T, R>): Prompter<R> {
-    this.transforms.push(callback);
-    return this as unknown as Prompter<R>;
-  }
-
-  /** 추가된 순서대로 사용자 응답에 변환을 적용합니다. */
-  protected applyTransforms(result: PromptResult<T>): PromptResult<T> {
-    for (const cb of this.transforms) {
-      if (result === undefined) {
-        return result;
-      }
-
-      const _result: T | undefined = cb(result);
-      if (_result !== undefined) {
-        result = _result;
-      }
+    if (options.canPickMany) {
+      this.canSelectMany = options.canPickMany;
     }
 
-    return result;
+    this.picker.canSelectMany = this.canSelectMany;
   }
 
-  /**
-   * 사용자가 응답할 대화 상자를 엽니다.
-   * @returns The user-response, undefined, or a special control-signal used in Wizards.
-   */
-  public async prompt(): Promise<PromptResult<T>> {
-    if (this.disposed) {
-      throw new Error('Cannot call "prompt" multiple times');
+  async interact(): Promise<T | T[] | undefined> {
+    const disposables: vscode.Disposable[] = [];
+
+    try {
+      const response = await new Promise<T | T[] | undefined>((resolve) => {
+        this.picker.onDidAccept(
+          () => {
+            if (this.canSelectMany) {
+              resolve(Array.from(this.picker.selectedItems));
+            } else {
+              resolve(this.picker.selectedItems[0]);
+            }
+          },
+          this.picker,
+          disposables
+        );
+
+        this.picker.onDidHide(
+          () => {
+            resolve(undefined);
+          },
+          this.picker,
+          disposables
+        );
+
+        this.picker.show();
+      });
+
+      return response;
+    } finally {
+      disposables.forEach((d) => d.dispose() as void);
+      this.picker.hide();
     }
-    this.disposed = true;
-    return this.applyTransforms(await this.promptUser());
+  }
+}
+
+export class InputPrompter<T> implements Prompter<T> {
+  picker: vscode.QuickInput;
+
+  constructor(picker: vscode.InputBox) {
+    this.picker = picker;
   }
 
-  // public abstract setStepEstimator(estimator: StepEstimator<T>): void;
-  protected abstract promptUser(): Promise<PromptResult<T>>;
-  public abstract setSteps(current: number, total: number): void;
+  interact(): Promise<T | T[] | undefined> {
+    return new Promise((resolve) => {
+      return resolve([]);
+    });
+  }
 }
