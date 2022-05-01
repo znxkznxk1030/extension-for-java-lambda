@@ -1,13 +1,15 @@
 import * as vscode from "vscode";
 import { ListRolesCommand, Role } from "@aws-sdk/client-iam";
 import { iamClient } from "../../clients/iamClient";
-import { PickPrompter } from "../../ui/prompter";
+import { DefaultPickItem, PickPrompter } from "../../ui/prompter";
 import { s3Client } from "../../clients/s3Client";
 import { Bucket, ListBucketsCommand } from "@aws-sdk/client-s3";
 import { ENTITY_LAMBDA, hasRoleTrustedEntity } from "../../iam/utils";
+import { DeployLambdaWizard } from "../wizard/DeployLambdaWizard";
 
 export async function deployLambdaFunction() {
   const rolePrompter = new PickPrompter({
+    id: "role",
     title: "Select Role",
     loadItemsAsync: async () => {
       let { Roles } = await iamClient.send(new ListRolesCommand({}));
@@ -24,11 +26,12 @@ export async function deployLambdaFunction() {
     },
   });
 
-  const response = await rolePrompter.interact();
-  console.log("Selected Role : " + JSON.stringify(response));
+  // const response = await rolePrompter.interact();
+  // console.log("Selected Role : " + JSON.stringify(response));
 
 
   const bucketPrompter = new PickPrompter({
+    id: "bucket",
     title: "Select Bucket",
     loadItemsAsync: async () => {
       let { Buckets } = await s3Client.send(new ListBucketsCommand({}));
@@ -42,16 +45,13 @@ export async function deployLambdaFunction() {
     },
   });
 
-  const response2 = await bucketPrompter.interact();
-  console.log("Selected Bucket : " + JSON.stringify(response2));
-}
+  // const response2 = await bucketPrompter.interact();
+  // console.log("Selected Bucket : " + JSON.stringify(response2));
 
-class DefaultPickItem implements vscode.QuickPickItem {
-  public readonly label: string;
-  public readonly data: object | string | number | undefined;
+  const wizard = new DeployLambdaWizard();
 
-  constructor(name?: string, data?: object) {
-    this.label = name || "[Anonymous]";
-    this.data = data;
-  }
+  wizard.addPrompter(rolePrompter);
+  wizard.addPrompter(bucketPrompter);
+
+  wizard.run();
 }

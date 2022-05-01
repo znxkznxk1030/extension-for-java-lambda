@@ -7,14 +7,14 @@
  */
 
 import * as vscode from "vscode";
-import { WizardControl } from "../wizard/wizard";
+// // import { WizardControl } from "../wizard/wizard";
 
-type WizardButton<T> =
-  | QuickInputButton<T | WizardControl>
-  | QuickInputButton<void>;
-export type PrompterButtons<T> = readonly WizardButton<T>[];
+// type WizardButton<T> =
+//   | QuickInputButton<T | WizardControl>
+//   | QuickInputButton<void>;
+// export type PrompterButtons<T> = readonly WizardButton<T>[];
 
-/** Light wrapper around VS Code's buttons, adding a `onClick` callback. */
-export interface QuickInputButton<T> extends vscode.QuickInputButton {
-  onClick?: () => T;
-}
+// /** Light wrapper around VS Code's buttons, adding a `onClick` callback. */
+// export interface QuickInputButton<T> extends vscode.QuickInputButton {
+//   onClick?: () => T;
+// }

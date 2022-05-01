@@ -6,22 +6,47 @@ export interface Prompter<T> {
   initialize: (options?: vscode.QuickPickOptions & AdditionalOptions) => void;
   beforeInteract?: () => void | Promise<any>;
   interact: () => Promise<T | T[] | undefined>;
+  id: string;
 }
 
 type AdditionalOptions = {
+  id: string;
   title: string;
   loadItemsAsync?: () => Promise<any[] | undefined>;
   mapperToPickItem?: (arg?: any[]) => vscode.QuickPickItem[] | undefined;
 };
 
-export class PickPrompter<T extends vscode.QuickPickItem> implements Prompter<T> {
+export class DefaultPickItem implements vscode.QuickPickItem {
+  public readonly label: string;
+  public readonly data: object | string | number | undefined;
+
+  constructor(name?: string, data?: object) {
+    this.label = name || "[Anonymous]";
+    this.data = data;
+  }
+}
+
+type TPrompterResult = {};
+
+export class PickPrompter<
+  T extends vscode.QuickPickItem & {
+    data: object | string | number | undefined;
+  }
+> implements Prompter<T>
+{
+  _id: string;
   picker: vscode.QuickPick<T>;
   canSelectMany = false;
   loadItemsAsync?: () => Promise<any[] | undefined>;
   mapperToPickItem?: (arg?: any[]) => vscode.QuickPickItem[] | undefined;
 
+  public get id(): string {
+    return this._id;
+  }
+
   constructor(options: vscode.QuickPickOptions & AdditionalOptions) {
     this.picker = vscode.window.createQuickPick<T>();
+    this._id = options.id;
     this.initialize(options);
   }
 
@@ -92,9 +117,15 @@ export class PickPrompter<T extends vscode.QuickPickItem> implements Prompter<T>
 }
 
 export class InputPrompter<T> implements Prompter<T> {
+  _id: string;
   picker: vscode.QuickInput;
 
+  public get id(): string {
+    return this._id;
+  }
+
   constructor(picker: vscode.InputBox) {
+    this._id = "";
     this.picker = picker;
     this.initialize();
   }
