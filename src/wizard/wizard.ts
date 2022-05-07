@@ -2,8 +2,8 @@ import { Prompter } from "../ui/prompter";
 
 export class wizard {}
 
-export abstract class Wizard<TResult> {
-  protected readonly payload: Partial<TResult> = {};
+export abstract class Wizard<TContext, TResult> {
+  protected readonly payload: Partial<TContext> = {};
   private readonly prompterList: Prompter<any>[] = [];
 
   protected constructor() {}
@@ -24,6 +24,8 @@ export abstract class Wizard<TResult> {
         [prompter.id]: selectedItem.data,
       });
     }
+
+    console.log("RUN : ", this.payload);
 
     return this.getResult();
   }

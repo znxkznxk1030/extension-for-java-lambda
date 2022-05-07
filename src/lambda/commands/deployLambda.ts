@@ -26,9 +26,6 @@ export async function deployLambdaFunction() {
     },
   });
 
-  // const response = await rolePrompter.interact();
-  // console.log("Selected Role : " + JSON.stringify(response));
-
 
   const bucketPrompter = new PickPrompter({
     id: "bucket",
@@ -45,13 +42,12 @@ export async function deployLambdaFunction() {
     },
   });
 
-  // const response2 = await bucketPrompter.interact();
-  // console.log("Selected Bucket : " + JSON.stringify(response2));
-
   const wizard = new DeployLambdaWizard();
 
   wizard.addPrompter(rolePrompter);
   wizard.addPrompter(bucketPrompter);
 
   wizard.run();
+
+  console.log(wizard.getResult());
 }
