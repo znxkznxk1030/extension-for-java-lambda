@@ -12,7 +12,7 @@ export interface Prompter<T> {
 type AdditionalOptions = {
   id: string;
   title: string;
-  loadItemsAsync?: () => Promise<any[] | undefined>;
+  loadItemsAsync?: (context?: any) => Promise<any[] | undefined>;
   mapperToPickItem?: (arg?: any[]) => vscode.QuickPickItem[] | undefined;
 };
 
@@ -37,7 +37,7 @@ export class PickPrompter<
   _id: string;
   picker: vscode.QuickPick<T>;
   canSelectMany = false;
-  loadItemsAsync?: () => Promise<any[] | undefined>;
+  loadItemsAsync?: (context?: any) => Promise<any[] | undefined>;
   mapperToPickItem?: (arg?: any[]) => vscode.QuickPickItem[] | undefined;
 
   public get id(): string {
@@ -63,10 +63,10 @@ export class PickPrompter<
     this.mapperToPickItem = options?.mapperToPickItem;
   }
 
-  async beforeInteract() {
+  async beforeInteract(context?: any) {
     let items;
     if (this.loadItemsAsync) {
-      items = await this.loadItemsAsync();
+      items = await this.loadItemsAsync(context);
     }
 
     if (this.mapperToPickItem) {
@@ -78,11 +78,11 @@ export class PickPrompter<
     }
   }
 
-  async interact(): Promise<T | T[] | undefined> {
+  async interact(context?: any): Promise<T | T[] | undefined> {
     const disposables: vscode.Disposable[] = [];
 
     try {
-      await this.beforeInteract();
+      await this.beforeInteract(context);
 
       const response = await new Promise<T | T[] | undefined>((resolve) => {
         this.picker.onDidAccept(

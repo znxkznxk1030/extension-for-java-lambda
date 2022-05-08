@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
 import { ListRolesCommand, Role } from "@aws-sdk/client-iam";
 import { iamClient } from "../../clients/iamClient";
@@ -5,15 +6,24 @@ import { DefaultPickItem, PickPrompter } from "../../ui/prompter";
 import { s3Client } from "../../clients/s3Client";
 import { Bucket, ListBucketsCommand } from "@aws-sdk/client-s3";
 import { ENTITY_LAMBDA, hasRoleTrustedEntity } from "../../iam/utils";
-import { DeployLambdaWizard } from "../wizard/DeployLambdaWizard";
+import {
+  DeployLambdaWizard,
+  TDeployLambdaPayload,
+  TWizardContext,
+} from "../wizard/DeployLambdaWizard";
+import { Account, config, Config } from "aws-sdk";
+import { lambdaClient } from "../../clients/lambdaClient";
+import { CreateFunctionCommand } from "@aws-sdk/client-lambda";
 
 export async function deployLambdaFunction() {
+  console.log(Config);
+
   const rolePrompter = new PickPrompter({
     id: "role",
     title: "Select Role",
-    loadItemsAsync: async () => {
-      let { Roles } = await iamClient.send(new ListRolesCommand({}));
-      return Roles;
+    loadItemsAsync: async (context: TWizardContext) => {
+      let { Roles: roles } = await iamClient.send(new ListRolesCommand({}));
+      return roles;
     },
     mapperToPickItem: (roles?: Role[]) => {
       return roles
@@ -26,14 +36,15 @@ export async function deployLambdaFunction() {
     },
   });
 
-
   const bucketPrompter = new PickPrompter({
     id: "bucket",
     title: "Select Bucket",
-    loadItemsAsync: async () => {
-      let { Buckets } = await s3Client.send(new ListBucketsCommand({}));
+    loadItemsAsync: async (context: TWizardContext) => {
+      let { Buckets: buckets } = await s3Client.send(
+        new ListBucketsCommand({})
+      );
 
-      return Buckets;
+      return buckets;
     },
     mapperToPickItem: (bucketList?: Bucket[]) => {
       return bucketList?.map((bucket) => {
@@ -42,12 +53,25 @@ export async function deployLambdaFunction() {
     },
   });
 
-  const wizard = new DeployLambdaWizard();
+  const wizard = new DeployLambdaWizard({
+    name: "test-lambda-function",
+    description: "test to deploy lambda function",
+    region: "ap-northeast-2",
+    runtime: "java11",
+    file: "hello-lambda.jar",
+    handler: "com.amazon.test.App::handleRequest",
+  });
 
   wizard.addPrompter(rolePrompter);
   wizard.addPrompter(bucketPrompter);
 
-  wizard.run();
+  let payload = await wizard.run();
 
-  console.log(wizard.getResult());
+  if (!payload) {
+    return;
+  }
+
+  console.log(payload);
+
+  lambdaClient.send(new CreateFunctionCommand(payload));
 }

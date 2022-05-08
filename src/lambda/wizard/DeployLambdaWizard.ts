@@ -1,32 +1,55 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+import { CreateFunctionCommandInput } from "@aws-sdk/client-lambda";
 import { Wizard } from "../../wizard/wizard";
 
 export type TWizardContext = {
+  name: any;
+  description: any;
   region: any;
   bucket: any;
   role: any;
-  filepath: any;
-}
-
-export type TDeployLambdaPayload = {
-  region: string;
-  s3bucket: string;
-  iamRoleArn: string;
-  filePath: string;
+  file: any;
+  runtime: any;
+  handler: any;
 };
 
-export class DeployLambdaWizard extends Wizard<TWizardContext, TDeployLambdaPayload> {
-  constructor() {
+export type TDeployLambdaPayload = {
+  name: string;
+  description: string;
+  region: string;
+  s3bucket: string;
+  role: string;
+  file: string;
+  runtime: string;
+  handler: string;
+};
+
+export class DeployLambdaWizard extends Wizard<
+  TWizardContext,
+  CreateFunctionCommandInput
+> {
+  constructor(initialContext: Partial<TWizardContext>) {
     super();
+    this.context = {
+      ...initialContext,
+    };
   }
 
-  getResult(): TDeployLambdaPayload | undefined {
+  getResult(): CreateFunctionCommandInput | undefined {
     try {
-      console.log(this.payload);
-      const result: TDeployLambdaPayload = {} as TDeployLambdaPayload;
 
-      console.log("RESULT : ", result);
+      const payloadCreateFunction = {
+        FunctionName: this.context.name,
+        Role: this.context.role.Arn,
+        Code: {
+          S3Bucket: this.context.bucket.Name,
+          S3Key: this.context.file,
+        },
+        Runtime: this.context.runtime,
+        Handler: this.context.handler,
+      };
 
-      return result;
+      return payloadCreateFunction;
     } catch (e) {
       console.error(e);
       // throw merging error

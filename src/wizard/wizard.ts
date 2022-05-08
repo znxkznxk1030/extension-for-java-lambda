@@ -1,9 +1,7 @@
 import { Prompter } from "../ui/prompter";
 
-export class wizard {}
-
 export abstract class Wizard<TContext, TResult> {
-  protected readonly payload: Partial<TContext> = {};
+  protected context: Partial<TContext> = {};
   private readonly prompterList: Prompter<any>[] = [];
 
   protected constructor() {}
@@ -20,12 +18,12 @@ export abstract class Wizard<TContext, TResult> {
         continue;
       }
 
-      Object.assign(this.payload, {
+      Object.assign(this.context, {
         [prompter.id]: selectedItem.data,
       });
     }
 
-    console.log("RUN : ", this.payload);
+    console.log("RUN : ", this.context);
 
     return this.getResult();
   }
