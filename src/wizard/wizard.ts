@@ -1,4 +1,4 @@
-import { Prompter } from "../ui/prompter";
+import { Prompter, PrompterDetermination } from "../ui/prompter";
 
 export abstract class Wizard<TContext, TResult> {
   protected context: Partial<TContext> = {};
@@ -12,14 +12,14 @@ export abstract class Wizard<TContext, TResult> {
 
   public async run(): Promise<TResult | undefined> {
     for (const prompter of this.prompterList) {
-      const selectedItem = await prompter.interact();
+      const determination: PrompterDetermination = await prompter.interact();
 
-      if (!selectedItem) {
+      if (!determination) {
         continue;
       }
 
       Object.assign(this.context, {
-        [prompter.id]: selectedItem.data,
+        [prompter.id]: determination.data,
       });
     }
 

@@ -2,7 +2,7 @@ import { resolve } from "path";
 import * as vscode from "vscode";
 
 export interface Prompter<T> {
-  picker: vscode.QuickInput;
+  prompter: vscode.QuickInput;
   initialize: (options?: vscode.QuickPickOptions & AdditionalOptions) => void;
   beforeInteract?: () => void | Promise<any>;
   interact: () => Promise<T | T[] | undefined>;
@@ -16,17 +16,31 @@ type AdditionalOptions = {
   mapperToPickItem?: (arg?: any[]) => vscode.QuickPickItem[] | undefined;
 };
 
-export class DefaultPickItem implements vscode.QuickPickItem {
-  public readonly label: string;
-  public readonly data: object | string | number | undefined;
+export class PrompterDetermination {
+  public readonly data: any;
 
-  constructor(name?: string, data?: object) {
-    this.label = name || "[Anonymous]";
+  constructor(data?: any) {
     this.data = data;
   }
 }
 
-type TPrompterResult = {};
+export class DefaultPickItem
+  extends PrompterDetermination
+  implements vscode.QuickPickItem
+{
+  public readonly label: string;
+
+  constructor(name?: string, data?: object) {
+    super(data);
+    this.label = name || "[Anonymous]";
+  }
+}
+
+export class DefaultInputValue extends PrompterDetermination {
+  constructor(data?: object | string) {
+    super(data);
+  }
+}
 
 export class PickPrompter<
   T extends vscode.QuickPickItem & {
@@ -35,7 +49,7 @@ export class PickPrompter<
 > implements Prompter<T>
 {
   _id: string;
-  picker: vscode.QuickPick<T>;
+  prompter: vscode.QuickPick<T>;
   canSelectMany = false;
   loadItemsAsync?: (context?: any) => Promise<any[] | undefined>;
   mapperToPickItem?: (arg?: any[]) => vscode.QuickPickItem[] | undefined;
@@ -45,19 +59,19 @@ export class PickPrompter<
   }
 
   constructor(options: vscode.QuickPickOptions & AdditionalOptions) {
-    this.picker = vscode.window.createQuickPick<T>();
+    this.prompter = vscode.window.createQuickPick<T>();
     this._id = options.id;
     this.initialize(options);
   }
 
   initialize(options?: vscode.QuickPickOptions & AdditionalOptions) {
-    this.picker.title = options?.title;
+    this.prompter.title = options?.title;
 
     if (options?.canPickMany) {
       this.canSelectMany = options.canPickMany;
     }
 
-    this.picker.canSelectMany = this.canSelectMany;
+    this.prompter.canSelectMany = this.canSelectMany;
 
     this.loadItemsAsync = options?.loadItemsAsync;
     this.mapperToPickItem = options?.mapperToPickItem;
@@ -74,7 +88,7 @@ export class PickPrompter<
     }
 
     if (items) {
-      this.picker.items = items;
+      this.prompter.items = items;
     }
   }
 
@@ -85,56 +99,89 @@ export class PickPrompter<
       await this.beforeInteract(context);
 
       const response = await new Promise<T | T[] | undefined>((resolve) => {
-        this.picker.onDidAccept(
+        this.prompter.onDidAccept(
           () => {
             if (this.canSelectMany) {
-              resolve(Array.from(this.picker.selectedItems));
+              resolve(Array.from(this.prompter.selectedItems));
             } else {
-              resolve(this.picker.selectedItems[0]);
+              resolve(this.prompter.selectedItems[0]);
             }
           },
-          this.picker,
+          this.prompter,
           disposables
         );
 
-        this.picker.onDidHide(
+        this.prompter.onDidHide(
           () => {
             resolve(undefined);
           },
-          this.picker,
+          this.prompter,
           disposables
         );
 
-        this.picker.show();
+        this.prompter.show();
       });
 
       return response;
     } finally {
       disposables.forEach((d) => d.dispose() as void);
-      this.picker.hide();
+      this.prompter.hide();
     }
   }
 }
 
-export class InputPrompter<T> implements Prompter<T> {
+export class InputPrompter implements Prompter<DefaultInputValue> {
   _id: string;
-  picker: vscode.QuickInput;
+  prompter: vscode.InputBox;
 
   public get id(): string {
     return this._id;
   }
 
-  constructor(picker: vscode.InputBox) {
-    this._id = "";
-    this.picker = picker;
-    this.initialize();
+  constructor(options: vscode.InputBoxOptions & AdditionalOptions) {
+    this._id = options.id;
+    this.prompter = vscode.window.createInputBox();
+
+    this.initialize(options);
   }
 
-  initialize() {}
+  initialize(options?: vscode.InputBoxOptions & AdditionalOptions) {
+    this.prompter.title = options?.title;
+  }
 
-  interact(): Promise<T | T[] | undefined> {
-    return new Promise((resolve) => {
-      return resolve([]);
-    });
+  async interact(): Promise<DefaultInputValue | undefined> {
+    const disposables: vscode.Disposable[] = [];
+
+    try {
+      const response = await new Promise<DefaultInputValue | undefined>(
+        (resolve) => {
+          this.prompter.onDidAccept(
+            () => {
+              const value = this.prompter.value || "";
+              const inputValue = new DefaultInputValue(value);
+
+              resolve(inputValue);
+            },
+            this.prompter,
+            disposables
+          );
+
+          this.prompter.onDidHide(
+            () => {
+              resolve(undefined);
+            },
+            this.prompter,
+            disposables
+          );
+
+          this.prompter.show();
+        }
+      );
+
+      return response;
+    } finally {
+      disposables.forEach((d) => d.dispose() as void);
+      this.prompter.hide();
+    }
   }
 }

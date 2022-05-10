@@ -2,7 +2,11 @@
 import * as vscode from "vscode";
 import { ListRolesCommand, Role } from "@aws-sdk/client-iam";
 import { iamClient } from "../../clients/iamClient";
-import { DefaultPickItem, PickPrompter } from "../../ui/prompter";
+import {
+  DefaultPickItem,
+  InputPrompter,
+  PickPrompter,
+} from "../../ui/prompter";
 import { s3Client } from "../../clients/s3Client";
 import { Bucket, ListBucketsCommand } from "@aws-sdk/client-s3";
 import { ENTITY_LAMBDA, hasRoleTrustedEntity } from "../../iam/utils";
@@ -17,6 +21,11 @@ import { CreateFunctionCommand } from "@aws-sdk/client-lambda";
 
 export async function deployLambdaFunction() {
   console.log(Config);
+
+  const namePrompter = new InputPrompter({
+    id: "name",
+    title: "Enter the lambda function name",
+  });
 
   const rolePrompter = new PickPrompter({
     id: "role",
@@ -62,6 +71,7 @@ export async function deployLambdaFunction() {
     handler: "com.amazon.test.App::handleRequest",
   });
 
+  wizard.addPrompter(namePrompter);
   wizard.addPrompter(rolePrompter);
   wizard.addPrompter(bucketPrompter);
 
