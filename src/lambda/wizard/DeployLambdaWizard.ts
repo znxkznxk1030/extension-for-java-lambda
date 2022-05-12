@@ -11,6 +11,7 @@ export type TWizardContext = {
   file: any;
   runtime: any;
   handler: any;
+  s3object: any;
 };
 
 export type TDeployLambdaPayload = {
@@ -43,7 +44,7 @@ export class DeployLambdaWizard extends Wizard<
         Role: this.context.role.Arn,
         Code: {
           S3Bucket: this.context.bucket.Name,
-          S3Key: this.context.file,
+          S3Key: this.context.s3object.Key,
         },
         Runtime: this.context.runtime,
         Handler: this.context.handler,

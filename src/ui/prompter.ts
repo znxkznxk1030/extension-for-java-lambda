@@ -5,7 +5,7 @@ export interface Prompter<T> {
   prompter: vscode.QuickInput;
   initialize: (options?: vscode.QuickPickOptions & AdditionalOptions) => void;
   beforeInteract?: () => void | Promise<any>;
-  interact: () => Promise<T | T[] | undefined>;
+  interact: (context?: any) => Promise<T | T[] | undefined>;
   id: string;
 }
 
@@ -149,7 +149,7 @@ export class InputPrompter implements Prompter<DefaultInputValue> {
     this.prompter.title = options?.title;
   }
 
-  async interact(): Promise<DefaultInputValue | undefined> {
+  async interact(context?: any): Promise<DefaultInputValue | undefined> {
     const disposables: vscode.Disposable[] = [];
 
     try {

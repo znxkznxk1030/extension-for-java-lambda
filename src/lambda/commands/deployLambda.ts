@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
-import { ListRolesCommand, Role } from "@aws-sdk/client-iam";
+import {
+  IAMServiceException,
+  ListRolesCommand,
+  Role,
+} from "@aws-sdk/client-iam";
 import { iamClient } from "../../clients/iamClient";
 import {
   DefaultPickItem,
@@ -8,7 +12,7 @@ import {
   PickPrompter,
 } from "../../ui/prompter";
 import { s3Client } from "../../clients/s3Client";
-import { Bucket, ListBucketsCommand } from "@aws-sdk/client-s3";
+import { Bucket, ListBucketsCommand, ListObjectsCommand, _Object } from "@aws-sdk/client-s3";
 import { ENTITY_LAMBDA, hasRoleTrustedEntity } from "../../iam/utils";
 import {
   DeployLambdaWizard,
@@ -17,14 +21,22 @@ import {
 } from "../wizard/DeployLambdaWizard";
 import { Account, config, Config } from "aws-sdk";
 import { lambdaClient } from "../../clients/lambdaClient";
-import { CreateFunctionCommand } from "@aws-sdk/client-lambda";
+import {
+  CreateFunctionCommand,
+  InvalidParameterValueException,
+  ServiceException,
+} from "@aws-sdk/client-lambda";
+import { Object } from "aws-sdk/clients/s3";
 
 export async function deployLambdaFunction() {
-  console.log(Config);
-
   const namePrompter = new InputPrompter({
     id: "name",
     title: "Enter the lambda function name",
+  });
+
+  const descriptionrompter = new InputPrompter({
+    id: "Description",
+    title: "Describe the lambda function",
   });
 
   const rolePrompter = new PickPrompter({
@@ -47,7 +59,7 @@ export async function deployLambdaFunction() {
 
   const bucketPrompter = new PickPrompter({
     id: "bucket",
-    title: "Select Bucket",
+    title: "Select S3 Bucket",
     loadItemsAsync: async (context: TWizardContext) => {
       let { Buckets: buckets } = await s3Client.send(
         new ListBucketsCommand({})
@@ -62,6 +74,26 @@ export async function deployLambdaFunction() {
     },
   });
 
+  const objectPrompter = new PickPrompter({
+    id: "s3object",
+    title: "Select S3 Key",
+    loadItemsAsync: async (context: TWizardContext) => {
+      console.log(context);
+      // const bucket:Bucket = context.bucket;
+      let { Contents: s3Objects } = await s3Client.send(
+        new ListObjectsCommand({ Bucket: context.bucket.Arn })
+      );
+
+      return s3Objects;
+    },
+    mapperToPickItem: (s3Objects) => {
+      console.log(s3Objects);
+      return s3Objects?.map((s3object) => {
+        return new DefaultPickItem(s3object.Key, s3object);
+      });
+    },
+  });
+
   const wizard = new DeployLambdaWizard({
     name: "test-lambda-function",
     description: "test to deploy lambda function",
@@ -72,8 +104,10 @@ export async function deployLambdaFunction() {
   });
 
   wizard.addPrompter(namePrompter);
+  wizard.addPrompter(descriptionrompter);
   wizard.addPrompter(rolePrompter);
   wizard.addPrompter(bucketPrompter);
+  wizard.addPrompter(objectPrompter);
 
   let payload = await wizard.run();
 
@@ -83,5 +117,16 @@ export async function deployLambdaFunction() {
 
   console.log(payload);
 
-  lambdaClient.send(new CreateFunctionCommand(payload));
+  lambdaClient
+    .send(new CreateFunctionCommand(payload))
+    .catch((exception: InvalidParameterValueException) => {
+      vscode.window.showErrorMessage(exception.message);
+    })
+    .catch((exception: IAMServiceException) => {
+      vscode.window.showErrorMessage(exception.message);
+    })
+    .catch((exception: ServiceException) => {
+      vscode.window.showErrorMessage(exception.message);
+      console.log("another exception");
+    });
 }

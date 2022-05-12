@@ -1,3 +1,4 @@
+import * as vscode from "vscode";
 import { Prompter, PrompterDetermination } from "../ui/prompter";
 
 export abstract class Wizard<TContext, TResult> {
@@ -11,21 +12,29 @@ export abstract class Wizard<TContext, TResult> {
   }
 
   public async run(): Promise<TResult | undefined> {
-    for (const prompter of this.prompterList) {
-      const determination: PrompterDetermination = await prompter.interact();
+    try {
+      for (const prompter of this.prompterList) {
+        const determination: PrompterDetermination = await prompter.interact(
+          this.context
+        );
 
-      if (!determination) {
-        continue;
+        if (!determination) {
+          continue;
+        }
+
+        Object.assign(this.context, {
+          [prompter.id]: determination.data,
+        });
       }
 
-      Object.assign(this.context, {
-        [prompter.id]: determination.data,
-      });
+      console.log("RUN : ", this.context);
+
+      return this.getResult();
+    } catch (exception: any) {
+      if (exception.message) {
+        vscode.window.showErrorMessage(exception.message);
+      }
     }
-
-    console.log("RUN : ", this.context);
-
-    return this.getResult();
   }
 
   protected abstract getResult(): TResult | undefined;
