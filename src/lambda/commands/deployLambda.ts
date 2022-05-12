@@ -12,7 +12,12 @@ import {
   PickPrompter,
 } from "../../ui/prompter";
 import { s3Client } from "../../clients/s3Client";
-import { Bucket, ListBucketsCommand, ListObjectsCommand, _Object } from "@aws-sdk/client-s3";
+import {
+  Bucket,
+  ListBucketsCommand,
+  ListObjectsCommand,
+  _Object,
+} from "@aws-sdk/client-s3";
 import { ENTITY_LAMBDA, hasRoleTrustedEntity } from "../../iam/utils";
 import {
   DeployLambdaWizard,
@@ -79,24 +84,33 @@ export async function deployLambdaFunction() {
     title: "Select S3 Key",
     loadItemsAsync: async (context: TWizardContext) => {
       console.log(context);
-      // const bucket:Bucket = context.bucket;
+      const bucket: Bucket = context.bucket;
+      console.log(bucket);
       let { Contents: s3Objects } = await s3Client.send(
-        new ListObjectsCommand({ Bucket: context.bucket.Arn })
+        new ListObjectsCommand({ Bucket: bucket.Name })
       );
 
       return s3Objects;
     },
     mapperToPickItem: (s3Objects) => {
       console.log(s3Objects);
-      return s3Objects?.map((s3object) => {
-        return new DefaultPickItem(s3object.Key, s3object);
-      });
+      return s3Objects
+        ?.filter((s3object: _Object) => {
+          if (s3object.Key) {
+            const key = s3object.Key
+            const ext = key.split(".").pop() || "";
+            return ["jar", "war", "zip"].includes(ext);
+          }
+          return false;
+        })
+        .map((s3object) => {
+          console.log(s3object);
+          return new DefaultPickItem(s3object.Key, s3object);
+        });
     },
   });
 
   const wizard = new DeployLambdaWizard({
-    name: "test-lambda-function",
-    description: "test to deploy lambda function",
     region: "ap-northeast-2",
     runtime: "java11",
     file: "hello-lambda.jar",
