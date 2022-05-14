@@ -33,7 +33,10 @@ export abstract class Wizard<TContext, TResult> {
     } catch (exception: any) {
       if (exception.message) {
         vscode.window.showErrorMessage(exception.message);
+      } else {
+        vscode.window.showErrorMessage(exception);
       }
+      // console.log( exception);
     }
   }
 

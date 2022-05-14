@@ -31,17 +31,27 @@ import {
   InvalidParameterValueException,
   ServiceException,
 } from "@aws-sdk/client-lambda";
-import { Object } from "aws-sdk/clients/s3";
 
 export async function deployLambdaFunction() {
   const namePrompter = new InputPrompter({
     id: "name",
     title: "Enter the lambda function name",
+    verifyPickItem: (
+      item: any,
+      resolve: (value: PromiseLike<undefined> | undefined) => void,
+      reject: (reason?: any) => void
+    ) => {
+      if (!!!item || /^\s*$/.test(item)) {
+        // TODO: 람다 이름 정규식 추가
+        reject("Doesn't match lambda name format");
+        // throw new Error("Doesn't match lambda name format");
+      }
+    },
   });
 
   const descriptionrompter = new InputPrompter({
     id: "Description",
-    title: "Describe the lambda function",
+    title: "Describe the lambda function ( optional )",
   });
 
   const rolePrompter = new PickPrompter({
@@ -97,7 +107,7 @@ export async function deployLambdaFunction() {
       return s3Objects
         ?.filter((s3object: _Object) => {
           if (s3object.Key) {
-            const key = s3object.Key
+            const key = s3object.Key;
             const ext = key.split(".").pop() || "";
             return ["jar", "war", "zip"].includes(ext);
           }

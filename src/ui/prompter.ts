@@ -6,6 +6,15 @@ export interface Prompter<T> {
   initialize: (options?: vscode.QuickPickOptions & AdditionalOptions) => void;
   beforeInteract?: () => void | Promise<any>;
   interact: (context?: any) => Promise<T | T[] | undefined>;
+  loadItemsAsync?: (context?: any) => Promise<any[] | undefined>;
+  mapperToPickItem?: (arg?: any[]) => vscode.QuickPickItem[] | undefined;
+  verifyPickItem?: (
+    pickItem: any,
+    resolve: (
+      value: T | T[] | PromiseLike<T | T[] | undefined> | undefined
+    ) => void,
+    reject: (reason?: any) => void
+  ) => void; // if result was not verfied, throw a exception
   id: string;
 }
 
@@ -14,6 +23,7 @@ type AdditionalOptions = {
   title: string;
   loadItemsAsync?: (context?: any) => Promise<any[] | undefined>;
   mapperToPickItem?: (arg?: any[]) => vscode.QuickPickItem[] | undefined;
+  verifyPickItem?: any;
 };
 
 export class PrompterDetermination {
@@ -53,6 +63,13 @@ export class PickPrompter<
   canSelectMany = false;
   loadItemsAsync?: (context?: any) => Promise<any[] | undefined>;
   mapperToPickItem?: (arg?: any[]) => vscode.QuickPickItem[] | undefined;
+  verifyPickItem?: (
+    pickItem: any,
+    resolve: (
+      value: T | T[] | PromiseLike<T | T[] | undefined> | undefined
+    ) => void,
+    reject: (reason?: any) => void
+  ) => void; // if result was not verfied, throw a exception
 
   public get id(): string {
     return this._id;
@@ -75,6 +92,7 @@ export class PickPrompter<
 
     this.loadItemsAsync = options?.loadItemsAsync;
     this.mapperToPickItem = options?.mapperToPickItem;
+    this.verifyPickItem = options?.verifyPickItem;
   }
 
   async beforeInteract(context?: any) {
@@ -98,29 +116,44 @@ export class PickPrompter<
     try {
       await this.beforeInteract(context);
 
-      const response = await new Promise<T | T[] | undefined>((resolve) => {
-        this.prompter.onDidAccept(
-          () => {
-            if (this.canSelectMany) {
-              resolve(Array.from(this.prompter.selectedItems));
-            } else {
-              resolve(this.prompter.selectedItems[0]);
-            }
-          },
-          this.prompter,
-          disposables
-        );
+      const response = await new Promise<T | T[] | undefined>(
+        (resolve, reject) => {
+          this.prompter.onDidAccept(
+            () => {
+              console.log("<< onDidAccept >>");
+              let result = null;
 
-        this.prompter.onDidHide(
-          () => {
-            resolve(undefined);
-          },
-          this.prompter,
-          disposables
-        );
+              if (this.canSelectMany) {
+                result = Array.from(this.prompter.selectedItems);
+              } else {
+                result = this.prompter.selectedItems[0];
+              }
 
-        this.prompter.show();
-      });
+              if (this.verifyPickItem) {
+                this.verifyPickItem(result, resolve, reject);
+              }
+
+              resolve(result);
+            },
+            this.prompter,
+            disposables
+          );
+
+          this.prompter.onDidHide(
+            () => {
+              console.log("<< onDidHide >>");
+              if (this.verifyPickItem) {
+                this.verifyPickItem(undefined, resolve, reject);
+              }
+              resolve(undefined);
+            },
+            this.prompter,
+            disposables
+          );
+
+          this.prompter.show();
+        }
+      );
 
       return response;
     } finally {
@@ -133,6 +166,13 @@ export class PickPrompter<
 export class InputPrompter implements Prompter<DefaultInputValue> {
   _id: string;
   prompter: vscode.InputBox;
+  verifyPickItem?: (
+    pickItem: any,
+    resolve: (
+      value: PromiseLike<undefined> | undefined
+    ) => void,
+    reject: (reason?: any) => void
+  ) => void; // if result was not verfied, throw a exception
 
   public get id(): string {
     return this._id;
@@ -147,6 +187,7 @@ export class InputPrompter implements Prompter<DefaultInputValue> {
 
   initialize(options?: vscode.InputBoxOptions & AdditionalOptions) {
     this.prompter.title = options?.title;
+    this.verifyPickItem = options?.verifyPickItem;
   }
 
   async interact(context?: any): Promise<DefaultInputValue | undefined> {
@@ -154,11 +195,15 @@ export class InputPrompter implements Prompter<DefaultInputValue> {
 
     try {
       const response = await new Promise<DefaultInputValue | undefined>(
-        (resolve) => {
+        (resolve, reject) => {
           this.prompter.onDidAccept(
             () => {
               const value = this.prompter.value || "";
               const inputValue = new DefaultInputValue(value);
+
+              if (this.verifyPickItem) {
+                this.verifyPickItem(inputValue, resolve, reject);
+              }
 
               resolve(inputValue);
             },
@@ -168,6 +213,9 @@ export class InputPrompter implements Prompter<DefaultInputValue> {
 
           this.prompter.onDidHide(
             () => {
+              if (this.verifyPickItem) {
+                this.verifyPickItem(undefined, resolve, reject);
+              }
               resolve(undefined);
             },
             this.prompter,
@@ -179,6 +227,8 @@ export class InputPrompter implements Prompter<DefaultInputValue> {
       );
 
       return response;
+    } catch (e) {
+      throw e;
     } finally {
       disposables.forEach((d) => d.dispose() as void);
       this.prompter.hide();
