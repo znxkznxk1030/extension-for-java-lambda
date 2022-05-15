@@ -27,9 +27,9 @@ type AdditionalOptions = {
 };
 
 export class PrompterDetermination {
-  public readonly data: any;
+  public readonly data: object | string | undefined;
 
-  constructor(data?: any) {
+  constructor(data?: object | string) {
     this.data = data;
   }
 }
@@ -40,7 +40,7 @@ export class DefaultPickItem
 {
   public readonly label: string;
 
-  constructor(name?: string, data?: object) {
+  constructor(name?: string, data?: object | string) {
     super(data);
     this.label = name || "[Anonymous]";
   }
@@ -168,9 +168,7 @@ export class InputPrompter implements Prompter<DefaultInputValue> {
   prompter: vscode.InputBox;
   verifyPickItem?: (
     pickItem: any,
-    resolve: (
-      value: PromiseLike<undefined> | undefined
-    ) => void,
+    resolve: (value: PromiseLike<undefined> | undefined) => void,
     reject: (reason?: any) => void
   ) => void; // if result was not verfied, throw a exception
 

@@ -28,7 +28,9 @@ import { Account, config, Config } from "aws-sdk";
 import { lambdaClient } from "../../clients/lambdaClient";
 import {
   CreateFunctionCommand,
+  CreateFunctionCommandOutput,
   InvalidParameterValueException,
+  Runtime,
   ServiceException,
 } from "@aws-sdk/client-lambda";
 
@@ -54,6 +56,31 @@ export async function deployLambdaFunction() {
     title: "Describe the lambda function ( optional )",
   });
 
+  const runtimePrompter = new PickPrompter({
+    id: "runtime",
+    title: "Select Runtime Environment",
+    loadItemsAsync: (context: TWizardContext) => {
+      console.log(Object.values(Runtime));
+      return new Promise((resolve) => {
+        const runtimeList = Object.values(Runtime)
+          .filter((runtime) => runtime !== undefined)
+          .map((runtime: string | undefined) => {
+            return new DefaultPickItem(runtime, runtime);
+          });
+        resolve(runtimeList);
+      });
+    },
+    verifyPickItem: (
+      item: any,
+      resolve: (value: PromiseLike<undefined> | undefined) => void,
+      reject: (reason?: any) => void
+    ) => {
+      if (!!!item || /^\s*$/.test(item)) {
+        reject("[Error] A Runtime is manatory.");
+      }
+    },
+  });
+
   const rolePrompter = new PickPrompter({
     id: "role",
     title: "Select Role",
@@ -69,6 +96,15 @@ export async function deployLambdaFunction() {
         .map((role) => {
           return new DefaultPickItem(role.RoleName, role);
         });
+    },
+    verifyPickItem: (
+      item: any,
+      resolve: (value: PromiseLike<undefined> | undefined) => void,
+      reject: (reason?: any) => void
+    ) => {
+      if (!!!item || /^\s*$/.test(item)) {
+        reject("[Error] A IAM Role for lambda function is manatory.");
+      }
     },
   });
 
@@ -86,6 +122,15 @@ export async function deployLambdaFunction() {
       return bucketList?.map((bucket) => {
         return new DefaultPickItem(bucket.Name, bucket);
       });
+    },
+    verifyPickItem: (
+      item: any,
+      resolve: (value: PromiseLike<undefined> | undefined) => void,
+      reject: (reason?: any) => void
+    ) => {
+      if (!!!item || /^\s*$/.test(item)) {
+        reject("[Error] A S3 Bucket is mandatory.");
+      }
     },
   });
 
@@ -118,17 +163,27 @@ export async function deployLambdaFunction() {
           return new DefaultPickItem(s3object.Key, s3object);
         });
     },
+    verifyPickItem: (
+      item: any,
+      resolve: (value: PromiseLike<undefined> | undefined) => void,
+      reject: (reason?: any) => void
+    ) => {
+      if (!!!item || /^\s*$/.test(item)) {
+        // TODO: 람다 이름 정규식 추가
+        reject("[Error] A S3 Object is mandatory.");
+        // throw new Error("Doesn't match lambda name format");
+      }
+    },
   });
 
   const wizard = new DeployLambdaWizard({
     region: "ap-northeast-2",
-    runtime: "java11",
-    file: "hello-lambda.jar",
     handler: "com.amazon.test.App::handleRequest",
   });
 
   wizard.addPrompter(namePrompter);
   wizard.addPrompter(descriptionrompter);
+  wizard.addPrompter(runtimePrompter);
   wizard.addPrompter(rolePrompter);
   wizard.addPrompter(bucketPrompter);
   wizard.addPrompter(objectPrompter);
@@ -143,6 +198,12 @@ export async function deployLambdaFunction() {
 
   lambdaClient
     .send(new CreateFunctionCommand(payload))
+    .then((result) => {
+      console.log(result);
+      vscode.window.showInformationMessage(
+        `[ Success ] Lambda Function ${result.FunctionName} ( ${result.FunctionArn} ) is deployed.`
+      );
+    })
     .catch((exception: InvalidParameterValueException) => {
       vscode.window.showErrorMessage(exception.message);
     })
