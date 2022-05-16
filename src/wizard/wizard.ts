@@ -18,7 +18,7 @@ export abstract class Wizard<TContext, TResult> {
           this.context
         );
 
-        if (!determination) {
+        if (!determination || !determination.data) {
           continue;
         }
 

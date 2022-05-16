@@ -21,18 +21,16 @@ import {
 import { ENTITY_LAMBDA, hasRoleTrustedEntity } from "../../iam/utils";
 import {
   DeployLambdaWizard,
-  TDeployLambdaPayload,
   TWizardContext,
 } from "../wizard/DeployLambdaWizard";
-import { Account, config, Config } from "aws-sdk";
 import { lambdaClient } from "../../clients/lambdaClient";
 import {
   CreateFunctionCommand,
-  CreateFunctionCommandOutput,
   InvalidParameterValueException,
   Runtime,
   ServiceException,
 } from "@aws-sdk/client-lambda";
+import { LambdaExplorer } from "../explorer/LambdaExplorer";
 
 export async function deployLambdaFunction() {
   const namePrompter = new InputPrompter({
@@ -60,7 +58,6 @@ export async function deployLambdaFunction() {
     id: "runtime",
     title: "Select Runtime Environment",
     loadItemsAsync: (context: TWizardContext) => {
-      console.log(Object.values(Runtime));
       return new Promise((resolve) => {
         const runtimeList = Object.values(Runtime)
           .filter((runtime) => runtime !== undefined)
@@ -72,7 +69,7 @@ export async function deployLambdaFunction() {
     },
     verifyPickItem: (
       item: any,
-      resolve: (value: PromiseLike<undefined> | undefined) => void,
+      _resolve: (value: PromiseLike<undefined> | undefined) => void,
       reject: (reason?: any) => void
     ) => {
       if (!!!item || /^\s*$/.test(item)) {
@@ -99,7 +96,7 @@ export async function deployLambdaFunction() {
     },
     verifyPickItem: (
       item: any,
-      resolve: (value: PromiseLike<undefined> | undefined) => void,
+      _resolve: (value: PromiseLike<undefined> | undefined) => void,
       reject: (reason?: any) => void
     ) => {
       if (!!!item || /^\s*$/.test(item)) {
@@ -125,7 +122,7 @@ export async function deployLambdaFunction() {
     },
     verifyPickItem: (
       item: any,
-      resolve: (value: PromiseLike<undefined> | undefined) => void,
+      _resolve: (value: PromiseLike<undefined> | undefined) => void,
       reject: (reason?: any) => void
     ) => {
       if (!!!item || /^\s*$/.test(item)) {
@@ -165,7 +162,7 @@ export async function deployLambdaFunction() {
     },
     verifyPickItem: (
       item: any,
-      resolve: (value: PromiseLike<undefined> | undefined) => void,
+      _resolve: (value: PromiseLike<undefined> | undefined) => void,
       reject: (reason?: any) => void
     ) => {
       if (!!!item || /^\s*$/.test(item)) {
@@ -174,6 +171,12 @@ export async function deployLambdaFunction() {
         // throw new Error("Doesn't match lambda name format");
       }
     },
+  });
+
+  const handlerPrompter = new InputPrompter({
+    id: "handler",
+    title:
+      "Enter the lambda function's hander ( default - com.amazon.test.App::handleRequest )",
   });
 
   const wizard = new DeployLambdaWizard({
@@ -187,6 +190,7 @@ export async function deployLambdaFunction() {
   wizard.addPrompter(rolePrompter);
   wizard.addPrompter(bucketPrompter);
   wizard.addPrompter(objectPrompter);
+  wizard.addPrompter(handlerPrompter);
 
   let payload = await wizard.run();
 
@@ -194,15 +198,17 @@ export async function deployLambdaFunction() {
     return;
   }
 
-  console.log(payload);
+  console.info(payload);
 
   lambdaClient
     .send(new CreateFunctionCommand(payload))
     .then((result) => {
-      console.log(result);
+      console.info(result);
       vscode.window.showInformationMessage(
         `[ Success ] Lambda Function ${result.FunctionName} ( ${result.FunctionArn} ) is deployed.`
       );
+      const lambdaTreeProvider = new LambdaExplorer();
+      lambdaTreeProvider.refresh();
     })
     .catch((exception: InvalidParameterValueException) => {
       vscode.window.showErrorMessage(exception.message);
@@ -212,6 +218,5 @@ export async function deployLambdaFunction() {
     })
     .catch((exception: ServiceException) => {
       vscode.window.showErrorMessage(exception.message);
-      console.log("another exception");
     });
 }
