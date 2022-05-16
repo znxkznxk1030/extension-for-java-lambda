@@ -27,8 +27,11 @@ import { lambdaClient } from "../../clients/lambdaClient";
 import {
   CreateFunctionCommand,
   InvalidParameterValueException,
+  ResourceConflictException,
   Runtime,
   ServiceException,
+  UpdateFunctionCodeCommand,
+  UpdateFunctionCodeCommandInput,
 } from "@aws-sdk/client-lambda";
 import { LambdaExplorer } from "../explorer/LambdaExplorer";
 
@@ -207,10 +210,11 @@ export async function deployLambdaFunction() {
       vscode.window.showInformationMessage(
         `[ Success ] Lambda Function ${result.FunctionName} ( ${result.FunctionArn} ) is deployed.`
       );
-      const lambdaTreeProvider = new LambdaExplorer();
-      lambdaTreeProvider.refresh();
+
+      vscode.commands.executeCommand("lambda.refreshEntry");
     })
     .catch((exception: InvalidParameterValueException) => {
+      console.error(exception);
       vscode.window.showErrorMessage(exception.message);
     })
     .catch((exception: IAMServiceException) => {
