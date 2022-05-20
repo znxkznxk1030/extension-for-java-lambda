@@ -31,4 +31,6 @@ export class AWSLambdaTreeNode extends AWSTreeNodeBase {
   }
 
   iconPath = path.join(__dirname, "..", "media", "aws-lambda.svg");
+
+  contextValue = "lambdaFunction";
 }

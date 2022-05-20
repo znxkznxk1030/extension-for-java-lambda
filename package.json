@@ -10,7 +10,6 @@
     "Other"
   ],
   "activationEvents": [
-    "onView:aws-invoke-function",
     "onView:awsIAMRoleExplorer",
     "onView:awsS3BucketExplorer",
     "onView:awsLambdaExplorer"
@@ -28,10 +27,6 @@
     },
     "views": {
       "awsLambdaExplorer-java": [
-        {
-          "id": "aws-invoke-function",
-          "name": "Invoke Lambda Function"
-        },
         {
           "id": "awsIAMRoleExplorer",
           "name": "IAM Role ( Trusted Entity - Lambda )"
@@ -68,6 +63,17 @@
           "when": "view == awsLambdaExplorer",
           "group": "navigation"
         }
+      ],
+      "view/item/context": [
+        {
+          "command": "lambda.editEntry",
+          "when": "view == awsLambdaExplorer"
+        },
+        {
+          "command": "lambda.deleteEntry",
+          "when": "view == awsLambdaExplorer",
+          "group": "inline"
+        }
       ]
     },
     "commands": [
@@ -102,6 +108,19 @@
           "light": "media/light/plus.svg",
           "dark": "media/dark/plus.svg"
         }
+      },
+      {
+        "command": "lambda.editEntry",
+        "title": "Edit",
+        "icon": {
+          "light": "media/light/edit.svg",
+          "dark": "media/dark/edit.svg"
+        }
+      },
+      {
+        "command": "lambda.deleteEntry",
+        "title": "Delete",
+        "icon": "media/trash-can.png"
       }
     ]
   },
