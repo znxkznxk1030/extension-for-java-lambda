@@ -26,5 +26,14 @@ export async function activateLambda(context: vscode.ExtensionContext) {
     )
   );
 
+  context.subscriptions.push(
+    vscode.commands.registerCommand("lambda.deleteEntry", (context) => {
+      console.log("lambda.deleteEntry", context);
+      console.log(context);
+
+      const lambdaName = context.label;
+    })
+  );
+
   context.subscriptions.push(lambdaTree);
 }
