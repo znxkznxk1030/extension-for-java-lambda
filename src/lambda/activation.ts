@@ -2,6 +2,7 @@ import { ListRolesCommand } from "@aws-sdk/client-iam";
 import * as vscode from "vscode";
 import { iamClient } from "../clients/iamClient";
 import { PickPrompter } from "../ui/prompter";
+import { deleteLambdaFunction } from "./commands/deleteLambda";
 import { deployLambdaFunction } from "./commands/deployLambda";
 import { LambdaExplorer } from "./explorer/LambdaExplorer";
 
@@ -31,7 +32,9 @@ export async function activateLambda(context: vscode.ExtensionContext) {
       console.log("lambda.deleteEntry", context);
       console.log(context);
 
-      const lambdaName = context.label;
+      const functionName = context.label;
+
+      deleteLambdaFunction(functionName);
     })
   );
 
