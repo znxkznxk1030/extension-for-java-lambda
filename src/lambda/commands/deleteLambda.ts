@@ -9,6 +9,8 @@ export async function deleteLambdaFunction(functionName: string) {
     new DeleteFunctionCommand({ FunctionName: functionName })
   );
 
+  // TODO: wizard로 한번더 확인해서 지우도록 확인
+
   console.log(result);
 
   vscode.window.showInformationMessage(

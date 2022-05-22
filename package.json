@@ -73,6 +73,11 @@
           "command": "lambda.deleteEntry",
           "when": "view == awsLambdaExplorer",
           "group": "inline"
+        },
+        {
+          "command": "s3buckets.createObject",
+          "when": "view == awsS3BucketExplorer && viewItem == awsBucketNode",
+          "group": "inline"
         }
       ]
     },
@@ -121,6 +126,14 @@
         "command": "lambda.deleteEntry",
         "title": "Delete",
         "icon": "media/trash-can.png"
+      },
+      {
+        "command": "s3buckets.createObject",
+        "title": "Add Function Source ( .zip or .jar )",
+        "icon": {
+          "light": "media/light/plus.svg",
+          "dark": "media/dark/plus.svg"
+        }
       }
     ]
   },

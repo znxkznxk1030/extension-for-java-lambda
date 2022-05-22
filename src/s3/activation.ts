@@ -15,4 +15,10 @@ export async function activateS3(context: vscode.ExtensionContext) {
       s3BucketTreeProvider.refresh();
     })
   );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("s3buckets.createObject", () => {
+      console.log("=== s3buckets.createObject ===");
+    })
+  );
 }
