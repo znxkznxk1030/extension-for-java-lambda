@@ -24,6 +24,7 @@ type AdditionalOptions = {
   loadItemsAsync?: (context?: any) => Promise<any[] | undefined>;
   mapperToPickItem?: (arg?: any[]) => vscode.QuickPickItem[] | undefined;
   verifyPickItem?: any;
+  placeHolder?: string;
 };
 
 export class PrompterDetermination {
@@ -185,6 +186,7 @@ export class InputPrompter implements Prompter<DefaultInputValue> {
 
   initialize(options?: vscode.InputBoxOptions & AdditionalOptions) {
     this.prompter.title = options?.title;
+    this.prompter.placeholder = options?.placeHolder;
     this.verifyPickItem = options?.verifyPickItem;
   }
 

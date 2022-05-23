@@ -3,19 +3,40 @@ import * as vscode from "vscode";
 
 import { DeleteFunctionCommand } from "@aws-sdk/client-lambda";
 import { lambdaClient } from "../../clients/lambdaClient";
+import { InputPrompter } from "../../ui/prompter";
 
 export async function deleteLambdaFunction(functionName: string) {
-  const result = await lambdaClient.send(
-    new DeleteFunctionCommand({ FunctionName: functionName })
-  );
+  const confirmPrompter = new InputPrompter({
+    id: "confirm",
+    title: `To confirm deletion, type "delete" in the field.
+      ( Deleting a function permanently removes the function code. Relevant logs, roles, test event schemas, and triggers are kept in your account. )`,
+    placeHolder: `delete`,
+    verifyPickItem: (
+      item: any,
+      resolve: (value: PromiseLike<undefined> | undefined) => void,
+      reject: (reason?: any) => void
+    ) => {
+      if (!!!item || /^\s*$/.test(item)) {
+        // TODO: 람다 이름 정규식 추가
+        reject("Doesn't match lambda name format");
+        // throw new Error("Doesn't match lambda name format");
+      }
+    },
+  });
 
-  // TODO: wizard로 한번더 확인해서 지우도록 확인
+  const confirm = await confirmPrompter.interact();
 
-  console.log(result);
+  if (confirm?.data === "delete") {
+    const result = await lambdaClient.send(
+      new DeleteFunctionCommand({ FunctionName: functionName })
+    );
 
-  vscode.window.showInformationMessage(
-    `[ Success ] Lambda Function ${functionName} is deleted.`
-  );
+    console.log(result);
 
-  vscode.commands.executeCommand("lambda.refreshEntry");
+    vscode.window.showInformationMessage(
+      `[ SUCCESS ] Lambda Function ${functionName} is deleted.\n`
+    );
+
+    vscode.commands.executeCommand("lambda.refreshEntry");
+  }
 }

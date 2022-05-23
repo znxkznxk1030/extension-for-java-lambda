@@ -180,6 +180,7 @@ export async function deployLambdaFunction() {
     id: "handler",
     title:
       "Enter the lambda function's hander ( default - com.amazon.test.App::handleRequest )",
+    placeHolder: "com.amazon.test.App::handleRequest",
   });
 
   const wizard = new DeployLambdaWizard({
@@ -208,7 +209,7 @@ export async function deployLambdaFunction() {
     .then((result) => {
       console.info(result);
       vscode.window.showInformationMessage(
-        `[ Success ] Lambda Function ${result.FunctionName} ( ${result.FunctionArn} ) is deployed.`
+        `[ SUCCESS ] Lambda Function ${result.FunctionName} ( ${result.FunctionArn} ) is deployed.`
       );
 
       vscode.commands.executeCommand("lambda.refreshEntry");
