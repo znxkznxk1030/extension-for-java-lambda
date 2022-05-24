@@ -14,17 +14,6 @@ export type TWizardContext = {
   s3object: any;
 };
 
-export type TDeployLambdaPayload = {
-  name: string;
-  description: string;
-  region: string;
-  s3bucket: string;
-  role: string;
-  file: string;
-  runtime: string;
-  handler: string;
-};
-
 export class DeployLambdaWizard extends Wizard<
   TWizardContext,
   CreateFunctionCommandInput
@@ -38,7 +27,6 @@ export class DeployLambdaWizard extends Wizard<
 
   getResult(): CreateFunctionCommandInput | undefined {
     try {
-
       const payloadCreateFunction = {
         FunctionName: this.context.name,
         Role: this.context.role.Arn,
@@ -54,6 +42,7 @@ export class DeployLambdaWizard extends Wizard<
     } catch (e) {
       console.error(e);
       // throw merging error
+      throw new Error("DeployLambdaWizard | Invoked error while getResult");
     }
   }
 }
