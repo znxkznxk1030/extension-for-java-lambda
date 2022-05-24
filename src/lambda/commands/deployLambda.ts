@@ -38,7 +38,7 @@ import { LambdaExplorer } from "../explorer/LambdaExplorer";
 export async function deployLambdaFunction() {
   const namePrompter = new InputPrompter({
     id: "name",
-    title: "Enter the lambda function name",
+    title: "(1/7) Enter the lambda function name",
     verifyPickItem: (
       item: any,
       resolve: (value: PromiseLike<undefined> | undefined) => void,
@@ -54,12 +54,12 @@ export async function deployLambdaFunction() {
 
   const descriptionrompter = new InputPrompter({
     id: "Description",
-    title: "Describe the lambda function ( optional )",
+    title: "(2/7) Describe the lambda function ( optional )",
   });
 
   const runtimePrompter = new PickPrompter({
     id: "runtime",
-    title: "Select Runtime Environment",
+    title: "(3/7) Select Runtime Environment",
     loadItemsAsync: (context: TWizardContext) => {
       return new Promise((resolve) => {
         const runtimeList = Object.values(Runtime)
@@ -83,7 +83,7 @@ export async function deployLambdaFunction() {
 
   const rolePrompter = new PickPrompter({
     id: "role",
-    title: "Select Role",
+    title: "(4/7) Select Role",
     loadItemsAsync: async (context: TWizardContext) => {
       let { Roles: roles } = await iamClient.send(new ListRolesCommand({}));
       return roles;
@@ -110,7 +110,7 @@ export async function deployLambdaFunction() {
 
   const bucketPrompter = new PickPrompter({
     id: "bucket",
-    title: "Select S3 Bucket",
+    title: "(5/7) Select S3 Bucket",
     loadItemsAsync: async (context: TWizardContext) => {
       let { Buckets: buckets } = await s3Client.send(
         new ListBucketsCommand({})
@@ -136,7 +136,7 @@ export async function deployLambdaFunction() {
 
   const objectPrompter = new PickPrompter({
     id: "s3object",
-    title: "Select S3 Key",
+    title: "(6/7) Select S3 Key",
     loadItemsAsync: async (context: TWizardContext) => {
       console.log(context);
       const bucket: Bucket = context.bucket;
@@ -179,7 +179,7 @@ export async function deployLambdaFunction() {
   const handlerPrompter = new InputPrompter({
     id: "handler",
     title:
-      "Enter the lambda function's hander ( default - com.amazon.test.App::handleRequest )",
+      "(7/7) Enter the lambda function's hander ( default - com.amazon.test.App::handleRequest )",
     placeHolder: "com.amazon.test.App::handleRequest",
   });
 
