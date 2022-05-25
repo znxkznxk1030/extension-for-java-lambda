@@ -8,7 +8,7 @@ import { InputPrompter } from "../../ui/prompter";
 export async function deleteLambdaFunction(functionName: string) {
   const confirmPrompter = new InputPrompter({
     id: "confirm",
-    title: `To confirm deletion, type "delete" in the field.
+    title: `(1/1) To confirm deletion, type "delete" in the field.
       ( Deleting a function permanently removes the function code. Relevant logs, roles, test event schemas, and triggers are kept in your account. )`,
     placeHolder: `delete`,
     verifyPickItem: (
