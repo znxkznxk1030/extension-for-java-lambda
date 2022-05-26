@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
-import * as fs from "fs";
 import { S3BucketExplorer } from "../s3/explorer/S3BucketExplorer";
-import glob = require("glob");
+import { uploadObject } from "./commands/uploadObject";
 
 export async function activateS3(context: vscode.ExtensionContext) {
   const s3BucketTreeProvider = new S3BucketExplorer();
@@ -19,11 +18,6 @@ export async function activateS3(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("s3buckets.createObject", async () => {
-      console.log("=== s3buckets.createObject ===");
-      const files = await vscode.workspace.findFiles("**/*.zip", "**/*.jar");
-
-      console.log(files);
-    })
+    vscode.commands.registerCommand("s3buckets.createObject", uploadObject)
   );
 }
