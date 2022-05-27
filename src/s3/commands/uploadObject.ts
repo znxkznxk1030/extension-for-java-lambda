@@ -11,7 +11,7 @@ export async function uploadObject() {
     id: "s3object",
     title: "(1/2) Select a file to upload",
     loadItemsAsync: async (context: TUploadObjectWizardContext) => {
-      const files = await vscode.workspace.findFiles("**/*.jar");
+      const files:vscode.Uri[] = await vscode.workspace.findFiles("**/*.jar");
 
       return files;
     },
@@ -21,11 +21,13 @@ export async function uploadObject() {
       });
     },
     verifyPickItem: (
-      file: any,
+      item: DefaultPickItem,
       _resolve: (value: PromiseLike<undefined> | undefined) => void,
       reject: (reason?: any) => void
     ) => {
-      if (!!!file || /^\s*$/.test(file)) {
+      const file:vscode.Uri = item.data as vscode.Uri;
+
+      if (!!!file || /^\s*$/.test(file.path)) {
         reject("[Error] A file is mandatory.");
       }
     },
