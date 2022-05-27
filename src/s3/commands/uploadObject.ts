@@ -4,11 +4,30 @@ import {
   TUploadObjectWizardContext,
   UploadObejctWizard,
 } from "../wizard/UploadObjectWizard";
-import { DefaultPickItem, PickPrompter } from "../../ui/prompter";
+import {
+  DefaultPickItem,
+  InputPrompter,
+  PickPrompter,
+} from "../../ui/prompter";
 import { s3Client } from "../../clients/s3Client";
 import { Bucket, ListBucketsCommand } from "@aws-sdk/client-s3";
 
 export async function uploadObject() {
+  const keyPrompter = new InputPrompter({
+    id: "key",
+    title: "(1/3) Enter the key of S3 Object",
+    verifyPickItem: (
+      item: any,
+      resolve: (value: PromiseLike<undefined> | undefined) => void,
+      reject: (reason?: any) => void
+    ) => {
+      if (!!!item || /^\s*$/.test(item)) {
+        // TODO: 람다 이름 정규식 추가
+        reject("Doesn't match s3 object name format");
+      }
+    },
+  });
+
   const filePrompter = new PickPrompter({
     id: "s3object",
     title: "(2/3) Select a file to upload",
@@ -63,6 +82,7 @@ export async function uploadObject() {
 
   const wizard = new UploadObejctWizard({});
 
+  wizard.addPrompter(keyPrompter);
   wizard.addPrompter(filePrompter);
   wizard.addPrompter(bucketPrompter);
 
