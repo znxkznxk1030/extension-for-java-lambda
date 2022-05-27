@@ -2,8 +2,8 @@ import { PutObjectRequest } from "@aws-sdk/client-s3";
 import { Wizard } from "../../wizard/wizard";
 
 export type TUploadObjectWizardContext = {
-  Bucket: "";
-  Key: "";
+  Bucket: string | undefined;
+  Key: string;
 };
 
 export type TUploadObjectPayload = {
@@ -28,7 +28,8 @@ export class UploadObejctWizard extends Wizard<
         Key: "",
       };
 
-      return putObejctRequest;
+      console.log(this.context);
+      return this.context as PutObjectRequest;
     } catch (e) {
       console.error(e);
       // throw merging error

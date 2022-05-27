@@ -27,7 +27,7 @@ export abstract class Wizard<TContext, TResult> {
         });
       }
 
-      console.log("RUN : ", this.context);
+      // console.log("RUN : ", this.context);
 
       return this.getResult();
     } catch (exception: any) {

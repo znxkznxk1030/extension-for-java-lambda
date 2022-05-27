@@ -11,11 +11,14 @@ import {
 } from "../../ui/prompter";
 import { s3Client } from "../../clients/s3Client";
 import { Bucket, ListBucketsCommand } from "@aws-sdk/client-s3";
+import { AWSS3BucketTreeNode } from "../explorer/S3BucketTreeNode";
 
-export async function uploadObject() {
+export async function uploadObject(treeNode: AWSS3BucketTreeNode) {
+  console.log(treeNode);
+
   const keyPrompter = new InputPrompter({
-    id: "key",
-    title: "(1/3) Enter the key of S3 Object",
+    id: "Key",
+    title: "(1/2) Enter the key of S3 Object",
     verifyPickItem: (
       item: any,
       resolve: (value: PromiseLike<undefined> | undefined) => void,
@@ -30,7 +33,7 @@ export async function uploadObject() {
 
   const filePrompter = new PickPrompter({
     id: "s3object",
-    title: "(2/3) Select a file to upload",
+    title: "(2/2) Select a file to upload",
     loadItemsAsync: async (context: TUploadObjectWizardContext) => {
       const files: vscode.Uri[] = await vscode.workspace.findFiles("**/*.jar");
 
@@ -54,37 +57,15 @@ export async function uploadObject() {
     },
   });
 
-  const bucketPrompter = new PickPrompter({
-    id: "bucket",
-    title: "(3/3) Select S3 Bucket",
-    loadItemsAsync: async (context: TUploadObjectWizardContext) => {
-      let { Buckets: buckets } = await s3Client.send(
-        new ListBucketsCommand({})
-      );
 
-      return buckets;
-    },
-    mapperToPickItem: (bucketList?: Bucket[]) => {
-      return bucketList?.map((bucket) => {
-        return new DefaultPickItem(bucket.Name, bucket);
-      });
-    },
-    verifyPickItem: (
-      item: any,
-      _resolve: (value: PromiseLike<undefined> | undefined) => void,
-      reject: (reason?: any) => void
-    ) => {
-      if (!!!item || /^\s*$/.test(item)) {
-        reject("[Error] A S3 Bucket is mandatory.");
-      }
-    },
+
+  const wizard = new UploadObejctWizard({
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    Bucket: treeNode.label as string,
   });
-
-  const wizard = new UploadObejctWizard({});
 
   wizard.addPrompter(keyPrompter);
   wizard.addPrompter(filePrompter);
-  wizard.addPrompter(bucketPrompter);
 
   let payload = await wizard.run();
 
