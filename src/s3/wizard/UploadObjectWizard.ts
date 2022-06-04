@@ -1,9 +1,19 @@
-import { PutObjectRequest } from "@aws-sdk/client-s3";
+import { PutObjectCommandInput } from "@aws-sdk/client-s3";
+import { getServers } from "dns";
+import * as fs from "fs";
+import { Uri } from "vscode";
 import { Wizard } from "../../wizard/wizard";
 
 export type TUploadObjectWizardContext = {
-  Bucket: string | undefined;
-  Key: string;
+  bucketName: string | undefined;
+  key: string | undefined;
+  file: Uri | undefined;
+};
+
+export type TUploadObjectRequest = {
+  Bucket: string;
+  key: string;
+  content: string;
 };
 
 export type TUploadObjectPayload = {
@@ -12,7 +22,7 @@ export type TUploadObjectPayload = {
 
 export class UploadObejctWizard extends Wizard<
   TUploadObjectWizardContext,
-  PutObjectRequest
+  PutObjectCommandInput
 > {
   constructor(initialContext: Partial<TUploadObjectWizardContext>) {
     super();
@@ -21,19 +31,25 @@ export class UploadObejctWizard extends Wizard<
     };
   }
 
-  protected getResult(): PutObjectRequest | undefined {
+  protected getResult(): PutObjectCommandInput {
     try {
-      const putObejctRequest = {
-        Bucket: "",
-        Key: "",
-      };
+      const uri = this.context.file;
+      const path = uri?.fsPath as fs.PathLike;
 
-      console.log(this.context);
-      return this.context as PutObjectRequest;
+      const stream = fs.createReadStream(path);
+      const uploadObjectRequest = {
+        Bucket: this.context.bucketName,
+        Key: this.context.key,
+        Body: stream.readable,
+      } as PutObjectCommandInput;
+
+      console.log("putObejctRequest: ", uploadObjectRequest);
+      return uploadObjectRequest;
     } catch (e) {
       console.error(e);
-      // throw merging error
-      throw new Error("UploadObejctWizard | Invoked error while getResult");
+      throw new Error(
+        "Fail To Upload Object. If Thie Error Repeated, Upload Object Directly With AWS Console. ( https://console.aws.amazon.com/console/home ) "
+      );
     }
   }
 }

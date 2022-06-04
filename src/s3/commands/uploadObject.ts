@@ -10,7 +10,11 @@ import {
   PickPrompter,
 } from "../../ui/prompter";
 import { s3Client } from "../../clients/s3Client";
-import { Bucket, ListBucketsCommand } from "@aws-sdk/client-s3";
+import {
+  Bucket,
+  ListBucketsCommand,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 import { AWSS3BucketTreeNode } from "../explorer/S3BucketTreeNode";
 import path = require("path");
 
@@ -18,7 +22,7 @@ export async function uploadObject(treeNode: AWSS3BucketTreeNode) {
   console.log(treeNode);
 
   const keyPrompter = new InputPrompter({
-    id: "Key",
+    id: "key",
     title: "(1/2) Enter the key of S3 Object",
     verifyPickItem: (
       key: any,
@@ -33,7 +37,7 @@ export async function uploadObject(treeNode: AWSS3BucketTreeNode) {
   });
 
   const filePrompter = new PickPrompter({
-    id: "s3object",
+    id: "file",
     title: "(2/2) Select a file to upload",
     loadItemsAsync: async (context: TUploadObjectWizardContext) => {
       const files: vscode.Uri[] = await vscode.workspace.findFiles("**/*.jar");
@@ -59,21 +63,33 @@ export async function uploadObject(treeNode: AWSS3BucketTreeNode) {
     },
   });
 
-
-
   const wizard = new UploadObejctWizard({
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    Bucket: treeNode.label as string,
+    bucketName: treeNode.label as string,
   });
 
   wizard.addPrompter(keyPrompter);
   wizard.addPrompter(filePrompter);
 
-  let payload = await wizard.run();
+  let putObjectCommandInput = await wizard.run();
 
-  if (!payload) {
+  if (!putObjectCommandInput) {
+    vscode.window.showErrorMessage(
+      `ERROR | Fail To Upload S3 Object With RequestObject: ${JSON.stringify(
+        putObjectCommandInput
+      )}`
+    );
     return;
   }
 
-  console.info(payload);
+  try {
+    const response = s3Client.send(new PutObjectCommand(putObjectCommandInput));
+    console.log("Response", response);
+  } catch (exception: any) {
+    if (exception.message) {
+      vscode.window.showErrorMessage(exception.message);
+    } else {
+      vscode.window.showErrorMessage(exception);
+    }
+  }
 }
