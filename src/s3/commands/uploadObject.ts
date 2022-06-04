@@ -12,6 +12,7 @@ import {
 import { s3Client } from "../../clients/s3Client";
 import { Bucket, ListBucketsCommand } from "@aws-sdk/client-s3";
 import { AWSS3BucketTreeNode } from "../explorer/S3BucketTreeNode";
+import path = require("path");
 
 export async function uploadObject(treeNode: AWSS3BucketTreeNode) {
   console.log(treeNode);
@@ -20,11 +21,11 @@ export async function uploadObject(treeNode: AWSS3BucketTreeNode) {
     id: "Key",
     title: "(1/2) Enter the key of S3 Object",
     verifyPickItem: (
-      item: any,
+      key: any,
       resolve: (value: PromiseLike<undefined> | undefined) => void,
       reject: (reason?: any) => void
     ) => {
-      if (!!!item || /^\s*$/.test(item)) {
+      if (!!!key || /^\s*$/.test(key)) {
         // TODO: 람다 이름 정규식 추가
         reject("Doesn't match s3 object name format");
       }
@@ -41,7 +42,8 @@ export async function uploadObject(treeNode: AWSS3BucketTreeNode) {
     },
     mapperToPickItem: (files) => {
       return files?.map((file) => {
-        return new DefaultPickItem(file.path, file);
+        const fileNameToDisplay = path.basename(file.path);
+        return new DefaultPickItem(fileNameToDisplay, file);
       });
     },
     verifyPickItem: (
